@@ -6,6 +6,7 @@
 <title>Finanzas Personales 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -139,6 +140,13 @@ tr:hover td{background:rgba(0,229,160,.03)}
 .btn-refresh .spin{display:inline-block;animation:spin 1s linear infinite}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .sync-info{font-size:9px;color:var(--muted);margin-top:2px;text-align:right}
+/* Google Auth */
+.btn-glogin{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:7px 16px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-glogin:hover{border-color:#4285f4;color:#4285f4;background:rgba(66,133,244,.08)}
+.btn-glogin.connected{color:var(--green);border-color:var(--green)}
+.auth-area{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.save-indicator{position:fixed;bottom:60px;right:24px;background:#1a2840;border:1px solid var(--blue);color:var(--blue);padding:8px 14px;border-radius:10px;font-size:11px;font-family:'DM Mono',monospace;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.save-indicator.show{opacity:1}
 
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
@@ -150,13 +158,19 @@ tr:hover td{background:rgba(0,229,160,.03)}
 <body>
 <header>
   <h1>💰 Finanzas <span>Personales</span> 2026</h1>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-    <button class="btn-refresh" id="btn-refresh" onclick="sincronizarSheets()">
-      <span id="refresh-icon">🔄</span> Actualizar desde Sheets
-    </button>
-    <div class="sync-info" id="sync-info">Última sync: datos locales</div>
+  <div class="auth-area">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-glogin" id="btn-glogin" onclick="handleAuthClick()">
+        <span>🔐</span> <span id="glogin-label">Conectar Google</span>
+      </button>
+      <button class="btn-refresh" id="btn-refresh" onclick="sincronizarSheets()">
+        <span id="refresh-icon">🔄</span> Actualizar
+      </button>
+    </div>
+    <div class="sync-info" id="sync-info">Sin conexión Google · datos locales</div>
   </div>
 </header>
+<div class="save-indicator" id="save-indicator">💾 Guardando en Sheets...</div>
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
@@ -768,6 +782,7 @@ function toggleEstado(type,idx){
   calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
   if(type==='gas')buildGastos();else buildObligaciones();
   showToast(`"${reg.desc}" → ${reg.est}${reg.est==='Pagado'?' ('+hoy+')':''}`);
+  guardarEstadoEnSheets(type, idx);
 }
 
 function showToast(msg){
@@ -933,6 +948,7 @@ function makeEditable(el, arr, idx, field, isNum){
     else if(arr===OBL) buildObligaciones();
     else if(arr===ING) buildIngresos();
     showToast(`"${arr[idx].desc}" actualizado`);
+    guardarCeldaEnSheets(arr, idx, field);
   }
   input.addEventListener('blur', save);
   input.addEventListener('keydown', e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape'){ arr[idx][field]=cur; if(arr===GAS) buildGastos(); else buildObligaciones(); }});
@@ -1060,6 +1076,7 @@ function makeEditableSelect(el, arr, idx, field, opciones){
     calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
     buildIngresos();
     showToast(`"${arr[idx].desc}" → ${field}: ${val}`);
+    guardarCeldaEnSheets(arr, idx, field);
   }
   sel.addEventListener('change', save);
   sel.addEventListener('blur', ()=>{ if(document.activeElement!==sel) save(); });
@@ -1162,6 +1179,9 @@ function agregarRegistro(){
   if(tipo==='ingreso') ING.push({id:'NEW',mes,fecha:fp,desc,banco:origen,entidad,monto});
   else if(tipo==='gasto') GAS.push({mes,fecha:fp,desc,origen,tipo:cat,monto,est});
   else OBL.push({id:'NEW',mes,fp,desc,tipo:cat,origen,monto,est,fo:''});
+  // Guardar en Sheets si hay sesión activa
+  const regNuevo = tipo==='ingreso' ? ING[ING.length-1] : tipo==='gasto' ? GAS[GAS.length-1] : OBL[OBL.length-1];
+  guardarNuevoRegistroEnSheets(tipo, regNuevo);
   calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
   const tc2={'ingreso':'g','gasto':'r','obligacion':'b'}[tipo];
   document.getElementById('t-nuevos').innerHTML+=`<tr>
@@ -1312,7 +1332,203 @@ async function sincronizarSheets(){
   }
 }
 
+// ═══ GOOGLE OAUTH + SHEETS WRITE-BACK ═══
+const G_CLIENT_ID   = '646863731721-7g1j0jn1vlsqkmoja9a1445btvcdkdv6.apps.googleusercontent.com';
+const G_SHEET_ID    = '1uzLXTtM6E0mYMsPdz5BekKHDJLCH8I3Nxv2lwVzV-Tg';
+const G_SCOPES      = 'https://www.googleapis.com/auth/spreadsheets';
+
+// Nombre exacto de tus hojas en Google Sheets (sensible a mayúsculas)
+const SHEET_NAMES = {
+  ingresos:     'Ingresos',
+  gastos:       'Gastos',
+  obligaciones: 'Obligaciones',
+};
+
+let gAccessToken = null;
+let gTokenClient = null;
+
+function initGoogleAuth(){
+  if(!window.google) { setTimeout(initGoogleAuth, 500); return; }
+  gTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: G_CLIENT_ID,
+    scope: G_SCOPES,
+    callback: (resp) => {
+      if(resp.error){ console.error(resp); showToast('⚠️ Error de autenticación: '+resp.error); return; }
+      gAccessToken = resp.access_token;
+      updateAuthUI(true, resp.expires_in);
+      showToast('✅ Conectado a Google Sheets');
+    },
+  });
+}
+
+function handleAuthClick(){
+  if(gAccessToken){
+    // Desconectar
+    google.accounts.oauth2.revoke(gAccessToken, ()=>{});
+    gAccessToken = null;
+    updateAuthUI(false);
+    showToast('Sesión cerrada');
+  } else {
+    gTokenClient.requestAccessToken({prompt:'consent'});
+  }
+}
+
+function updateAuthUI(connected, expiresIn){
+  const btn   = document.getElementById('btn-glogin');
+  const label = document.getElementById('glogin-label');
+  const info  = document.getElementById('sync-info');
+  if(connected){
+    btn.classList.add('connected');
+    label.textContent = 'Google conectado ✓';
+    info.textContent  = '🟢 Cambios se guardan automáticamente en Sheets';
+    if(expiresIn) setTimeout(()=>{ gAccessToken=null; updateAuthUI(false); showToast('⏰ Sesión expirada — reconecta'); }, expiresIn*1000);
+  } else {
+    btn.classList.remove('connected');
+    label.textContent = 'Conectar Google';
+    info.textContent  = 'Sin conexión Google · datos locales';
+  }
+}
+
+function showSaveIndicator(msg){
+  const el = document.getElementById('save-indicator');
+  el.textContent = msg || '💾 Guardando en Sheets...';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ── Helpers para encontrar fila en Sheets ──
+async function sheetsRequest(method, range, body){
+  const base = `https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}`;
+  const url  = method==='GET'
+    ? `${base}/values/${encodeURIComponent(range)}`
+    : `${base}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const opts = {
+    method,
+    headers: { 'Authorization': 'Bearer '+gAccessToken, 'Content-Type': 'application/json' },
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if(!res.ok){ const e=await res.text(); throw new Error(e); }
+  return res.json();
+}
+
+// Obtiene todas las filas de una hoja y devuelve {headers, rows, rawRows}
+async function getSheetRows(sheetName){
+  const data = await sheetsRequest('GET', `${sheetName}!A:Z`);
+  const all  = data.values || [];
+  if(all.length < 2) return {headers:[], rows:[], rawRows:[]};
+  const headers = all[0].map(h=>h.trim());
+  const rows    = all.slice(1).map((r,i)=>{ const o={}; headers.forEach((h,j)=>o[h]=r[j]||''); o._rowNum=i+2; return o; });
+  return {headers, rows, rawRows:all};
+}
+
+// Escribe un valor en una celda específica
+async function writeCell(sheetName, rowNum, colLetter, value){
+  await sheetsRequest('PUT', `${sheetName}!${colLetter}${rowNum}`, { values: [[value]] });
+}
+
+// Encuentra la columna de un header
+function colIndex(headers, name){ return headers.findIndex(h=>h.toLowerCase().includes(name.toLowerCase())); }
+function colLetter(idx){ return String.fromCharCode(65+idx); }
+
+// ── Escritura por tipo de cambio ──
+
+async function guardarEstadoEnSheets(type, idx){
+  if(!gAccessToken) return;
+  const arr       = type==='gas' ? GAS : OBL;
+  const reg       = arr[idx];
+  const sheetName = type==='gas' ? SHEET_NAMES.gastos : SHEET_NAMES.obligaciones;
+  try {
+    showSaveIndicator('💾 Guardando estado...');
+    const {headers, rows} = await getSheetRows(sheetName);
+    const colEst  = colIndex(headers,'Estado');
+    const colFP   = colIndex(headers,'Fecha');
+    if(colEst<0) throw new Error('Columna Estado no encontrada');
+
+    // Buscar fila por descripción + mes
+    const mesLabel = ML[reg.mes]||reg.mes;
+    const fila = rows.find(r=>{
+      const desc = Object.values(r)[3]||''; // columna Descripción aprox
+      const mes  = r['MES']||r['Mes']||'';
+      return desc.toLowerCase()===reg.desc.toLowerCase() && mes.toLowerCase()===mesLabel.toLowerCase();
+    });
+    if(!fila){ showToast('⚠️ Fila no encontrada en Sheets'); return; }
+
+    await writeCell(sheetName, fila._rowNum, colLetter(colEst), reg.est);
+    if(colFP>=0 && reg.est==='Pagado'){
+      const fechaCol = type==='gas' ? colIndex(headers,'Fecha de Pago')||colFP : colIndex(headers,'Fecha de Pago')||colFP;
+      await writeCell(sheetName, fila._rowNum, colLetter(fechaCol), reg.fp||reg.fecha||'');
+    }
+    showSaveIndicator('✅ Estado guardado');
+  } catch(e){ console.error(e); showToast('⚠️ Error guardando: '+e.message); }
+}
+
+async function guardarCeldaEnSheets(arr, idx, field){
+  if(!gAccessToken) return;
+  const reg = arr[idx];
+  let sheetName, headerName;
+  if(arr===GAS){
+    sheetName  = SHEET_NAMES.gastos;
+    headerName = field==='monto' ? 'Monto' : field==='origen' ? 'Origen' : field;
+  } else if(arr===OBL){
+    sheetName  = SHEET_NAMES.obligaciones;
+    headerName = field==='monto' ? 'Monto' : field==='origen' ? 'Origen' : field;
+  } else {
+    sheetName  = SHEET_NAMES.ingresos;
+    headerName = field==='monto' ? 'Monto' : field==='entidad' ? 'Entidad' : field==='desc' ? 'Descripción' : field;
+  }
+  try {
+    showSaveIndicator('💾 Guardando cambio...');
+    const {headers, rows} = await getSheetRows(sheetName);
+    const colIdx = colIndex(headers, headerName);
+    if(colIdx<0) throw new Error('Columna '+headerName+' no encontrada');
+
+    const mesLabel = ML[reg.mes]||reg.mes;
+    const fila = rows.find(r=>{
+      const vals = Object.values(r);
+      const desc = arr===ING ? (r['Descripción']||r['Descripcion']||'') : (vals[3]||'');
+      const mes  = r['MES']||r['Mes']||'';
+      return desc.toLowerCase()===reg.desc.toLowerCase() && mes.toLowerCase()===mesLabel.toLowerCase();
+    });
+    if(!fila){ showToast('⚠️ Fila no encontrada en Sheets'); return; }
+
+    const valor = field==='monto' ? `$${reg.monto.toLocaleString('es-CO')}` : reg[field];
+    await writeCell(sheetName, fila._rowNum, colLetter(colIdx), valor);
+    showSaveIndicator('✅ Guardado en Sheets');
+  } catch(e){ console.error(e); showToast('⚠️ Error guardando: '+e.message); }
+}
+
+async function guardarNuevoRegistroEnSheets(tipo, reg){
+  if(!gAccessToken) return;
+  let sheetName, fila;
+  const mesLabel = ML[reg.mes]||reg.mes;
+  const montoFmt = `$${reg.monto.toLocaleString('es-CO')}`;
+  if(tipo==='ingreso'){
+    sheetName = SHEET_NAMES.ingresos;
+    fila = [reg.id||'NEW', mesLabel, reg.fecha||'', reg.desc, reg.banco||'', reg.entidad||'', montoFmt];
+  } else if(tipo==='gasto'){
+    sheetName = SHEET_NAMES.gastos;
+    fila = [mesLabel, reg.fecha||'', reg.desc, reg.tipo||'', reg.origen||'', montoFmt, reg.est||'Pendiente'];
+  } else {
+    sheetName = SHEET_NAMES.obligaciones;
+    fila = [reg.id||'NEW', mesLabel, reg.fp||'', reg.desc, reg.tipo||'', reg.origen||'', montoFmt, reg.est||'Pendiente', reg.fo||''];
+  }
+  try {
+    showSaveIndicator('💾 Agregando fila...');
+    const base = `https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}/values/${encodeURIComponent(sheetName+'!A:A')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    const res  = await fetch(base, {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+gAccessToken,'Content-Type':'application/json'},
+      body: JSON.stringify({values:[fila]}),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    showSaveIndicator('✅ Fila agregada en Sheets');
+  } catch(e){ console.error(e); showToast('⚠️ Error agregando: '+e.message); }
+}
+
 window.onload=()=>{
+  initGoogleAuth();
   // Aplicar rollover automático al cargar: registros Pendientes de meses pasados → mes siguiente
   applyRollover(GAS);
   applyRollover(OBL);
@@ -1321,3 +1537,4 @@ window.onload=()=>{
 </script>
 </body>
 </html>
+
