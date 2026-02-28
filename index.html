@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanzas Personales 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d18;--bg2:#0d1424;--bg3:#121c30;--card:#0f1828;
+  --border:#1a2840;--green:#00e5a0;--red:#ff4757;--blue:#4a9eff;
+  --amber:#ffc107;--purple:#a78bfa;--pink:#f472b6;
+  --text:#dde4f0;--muted:#4a6080;
+}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+header{background:linear-gradient(135deg,#080d18,#0c1830 60%,#081824);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+header h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+header h1 span{color:var(--green)}
+.live{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tabs{display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto}
+.tab{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:12px 18px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab:hover:not(.active){color:var(--text)}
+.content{padding:22px 28px;max-width:1500px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.filter-bar label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.month-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.month-btn.active{background:var(--green);color:#080d18;border-color:var(--green)}
+.month-btn:hover:not(.active){border-color:var(--green);color:var(--green)}
+
+/* LIBRO BAR */
+.libro-bar{background:linear-gradient(135deg,#0a1428,#0d1e38);border:1px solid #1e3555;border-radius:14px;padding:16px 22px;margin-bottom:18px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.lb-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--green)}
+.lb-item{display:flex;flex-direction:column;gap:2px}
+.lb-item .lb-l{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.lb-item .lb-v{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.lb-v.g{color:var(--green)}.lb-v.r{color:var(--red)}.lb-v.b{color:var(--blue)}.lb-v.a{color:var(--amber)}.lb-v.p{color:var(--purple)}
+.lb-sep{width:1px;height:34px;background:var(--border)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:transform .2s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.g::before{background:var(--green)}.kpi.r::before{background:var(--red)}.kpi.b::before{background:var(--blue)}.kpi.a::before{background:var(--amber)}.kpi.p::before{background:var(--purple)}
+.kpi-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;line-height:1}
+.kpi-val.g{color:var(--green)}.kpi-val.r{color:var(--red)}.kpi-val.b{color:var(--blue)}.kpi-val.a{color:var(--amber)}.kpi-val.p{color:var(--purple)}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* CHARTS */
+.charts-grid{display:grid;gap:12px;margin-bottom:18px}
+.cg2{grid-template-columns:1.4fr 1fr}
+.cg3{grid-template-columns:1fr 1fr 1fr}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text);margin-bottom:12px}
+.chart-wrap{position:relative;height:210px}
+.chart-wrap.tall{height:260px}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.table-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-header h3{font-family:'Syne',sans-serif;font-size:12px;font-weight:700}
+.table-wrap{overflow-x:auto;max-height:400px;overflow-y:auto}
+.table-wrap::-webkit-scrollbar{width:4px;height:4px}
+.table-wrap::-webkit-scrollbar-track{background:var(--bg2)}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 13px;text-align:left;border-bottom:1px solid var(--border);background:#090e1c;position:sticky;top:0;z-index:2}
+td{font-size:11px;padding:9px 13px;border-bottom:1px solid rgba(26,40,64,.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,229,160,.03)}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.tag.g{background:rgba(0,229,160,.1);color:var(--green)}.tag.r{background:rgba(255,71,87,.1);color:var(--red)}
+.tag.b{background:rgba(74,158,255,.1);color:var(--blue)}.tag.a{background:rgba(255,193,7,.1);color:var(--amber)}
+.tag.p{background:rgba(167,139,250,.1);color:var(--purple)}.tag.pk{background:rgba(244,114,182,.1);color:var(--pink)}
+.spag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.2);cursor:pointer;transition:all .15s;user-select:none}
+.spend{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,193,7,.1);color:var(--amber);border:1px solid rgba(255,193,7,.2);cursor:pointer;transition:all .15s;user-select:none}
+.spag::before{content:'●';font-size:7px}.spend::before{content:'○';font-size:7px}
+.spag:hover{background:rgba(0,229,160,.25);transform:scale(1.05)}
+.spend:hover{background:rgba(255,193,7,.25);transform:scale(1.05)}
+.svenc{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.3);cursor:pointer;transition:all .15s;user-select:none}
+.svenc::before{content:'⚠';font-size:9px}
+.svenc:hover{background:rgba(255,71,87,.25);transform:scale(1.05)}
+.moved-badge{display:inline-block;font-size:9px;color:var(--blue);background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.2);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+.proy-badge{display:inline-block;font-size:9px;color:var(--muted);background:rgba(74,96,128,.12);border:1px solid rgba(74,96,128,.25);border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+/* Editable cells */
+.editable{cursor:pointer;border-bottom:1px dashed var(--muted);transition:all .15s;padding:1px 3px;border-radius:3px}
+.editable:hover{background:rgba(0,229,160,.08);border-bottom-color:var(--green);color:var(--green)}
+.edit-input{background:var(--bg3);border:1px solid var(--green);border-radius:5px;padding:3px 7px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;width:100%;outline:none;min-width:90px}
+/* Chart toggle */
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chart-header .chart-title{margin-bottom:0}
+.chart-toggle{display:flex;gap:3px}
+.ctbtn{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.ctbtn.active{background:var(--green);color:#080d18;border-color:var(--green)}
+.ctbtn:hover:not(.active){border-color:var(--green);color:var(--green)}
+.pos{color:var(--green);font-weight:600}.neg{color:var(--red);font-weight:600}
+
+/* FORM */
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:18px}
+.add-form h3{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:16px;color:var(--green)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.form-group input,.form-group select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--green)}
+.form-group select option{background:#0d1424}
+.btn-add{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:10px 22px;background:var(--green);color:#080d18;border:none;border-radius:8px;cursor:pointer;transition:all .2s}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,229,160,.3)}
+.alert{padding:8px 13px;border-radius:8px;font-size:11px;margin-top:10px;display:none}
+.alert.ok{background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.3);display:block}
+.alert.err{background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.3);display:block}
+
+/* ENTITY BALANCE */
+.ent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ent-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:transform .2s}
+.ent-card:hover{transform:translateY(-2px)}
+.ent-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-c)}
+.ent-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:10px;color:#fff}
+.ent-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.ent-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.ent-val{font-size:12px;font-weight:600}
+.ent-bar-wrap{margin-top:10px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.ent-bar{height:100%;border-radius:2px;transition:width .6s ease}
+.ent-queda-big{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-top:8px}
+.ent-section-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px}
+.btn-refresh{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:7px 16px;background:transparent;color:var(--green);border:1px solid var(--green);border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-refresh:hover{background:rgba(0,229,160,.1);transform:translateY(-1px)}
+.btn-refresh.loading{opacity:.6;pointer-events:none;color:var(--amber);border-color:var(--amber)}
+.btn-refresh .spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.sync-info{font-size:9px;color:var(--muted);margin-top:2px;text-align:right}
+/* Google Auth */
+.btn-glogin{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:7px 16px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-glogin:hover{border-color:#4285f4;color:#4285f4;background:rgba(66,133,244,.08)}
+.btn-glogin.connected{color:var(--green);border-color:var(--green)}
+.auth-area{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.save-indicator{position:fixed;bottom:60px;right:24px;background:#1a2840;border:1px solid var(--blue);color:var(--blue);padding:8px 14px;border-radius:10px;font-size:11px;font-family:'DM Mono',monospace;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.save-indicator.show{opacity:1}
+/* Search + delete */
+.search-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.search-input{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;width:220px;transition:border-color .2s}
+.search-input:focus{border-color:var(--green)}
+.search-input::placeholder{color:var(--muted)}
+.btn-del{background:transparent;border:1px solid rgba(255,71,87,.3);color:var(--red);border-radius:6px;padding:2px 7px;font-size:10px;cursor:pointer;transition:all .15s;line-height:1.4}
+.btn-del:hover{background:rgba(255,71,87,.15);border-color:var(--red)}
+
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .cg2,.cg3{grid-template-columns:1fr}
+  .libro-bar{gap:14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>💰 Finanzas <span>Personales</span> 2026</h1>
+  <div class="auth-area">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-glogin" id="btn-glogin" onclick="handleAuthClick()">
+        <span>🔐</span> <span id="glogin-label">Conectar Google</span>
+      </button>
+      <button class="btn-refresh" id="btn-refresh" onclick="sincronizarSheets()">
+        <span id="refresh-icon">🔄</span> Actualizar
+      </button>
+    </div>
+    <div class="sync-info" id="sync-info">Sin conexión Google · datos locales</div>
+  </div>
+</header>
+<div class="save-indicator" id="save-indicator">💾 Guardando en Sheets...</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="switchTab('ingresos',this)">💵 Ingresos</button>
+  <button class="tab" onclick="switchTab('gastos',this)">🛒 Gastos</button>
+  <button class="tab" onclick="switchTab('obligaciones',this)">📋 Obligaciones</button>
+  <button class="tab" onclick="switchTab('agregar',this)">➕ Agregar</button>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="libro-bar">
+    <span class="lb-title">📚 Total Libro</span>
+    <div class="lb-item"><span class="lb-l">Ingresos Totales</span><span class="lb-v g" id="lib-ing">—</span></div>
+    <div class="lb-sep"></div>
+    <div class="lb-item"><span class="lb-l">Gastos Totales</span><span class="lb-v r" id="lib-gas">—</span></div>
+    <div class="lb-sep"></div>
+    <div class="lb-item"><span class="lb-l">Obligaciones Totales</span><span class="lb-v b" id="lib-obl">—</span></div>
+    <div class="lb-sep"></div>
+    <div class="lb-item"><span class="lb-l">Pendiente por Pagar</span><span class="lb-v a" id="lib-pend">—</span></div>
+    <div class="lb-sep"></div>
+    <div class="lb-item"><span class="lb-l">Balance Neto Total</span><span class="lb-v p" id="lib-bal">—</span></div>
+  </div>
+
+  <div class="filter-bar">
+    <label>Mes:</label>
+    <button class="month-btn active" onclick="filterDash('Todos',this)">Todos</button>
+    <button class="month-btn" onclick="filterDash('1_ENERO',this)">Ene</button>
+    <button class="month-btn" onclick="filterDash('2_FEBRERO',this)">Feb</button>
+    <button class="month-btn" onclick="filterDash('3_MARZO',this)">Mar</button>
+    <button class="month-btn" onclick="filterDash('4_ABRIL',this)">Abr</button>
+    <button class="month-btn" onclick="filterDash('5_MAYO',this)">May</button>
+    <button class="month-btn" onclick="filterDash('6_JUNIO',this)">Jun</button>
+    <button class="month-btn" onclick="filterDash('7_JULIO',this)">Jul</button>
+    <button class="month-btn" onclick="filterDash('8_AGOSTO',this)">Ago</button>
+    <button class="month-btn" onclick="filterDash('9_SEPTIEMBRE',this)">Sep</button>
+    <button class="month-btn" onclick="filterDash('10_OCTUBRE',this)">Oct</button>
+    <button class="month-btn" onclick="filterDash('11_NOVIEMBRE',this)">Nov</button>
+    <button class="month-btn" onclick="filterDash('12_DICIEMBRE',this)">Dic</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi g"><div class="kpi-label">Ingresos</div><div class="kpi-val g" id="k-ing">$0</div><div class="kpi-sub" id="k-ing-s"></div></div>
+    <div class="kpi r"><div class="kpi-label">Gastos</div><div class="kpi-val r" id="k-gas">$0</div><div class="kpi-sub" id="k-gas-s"></div></div>
+    <div class="kpi b"><div class="kpi-label">Obligaciones</div><div class="kpi-val b" id="k-obl">$0</div><div class="kpi-sub" id="k-obl-s"></div></div>
+    <div class="kpi a"><div class="kpi-label">Pendiente Pagar</div><div class="kpi-val a" id="k-pend">$0</div><div class="kpi-sub" id="k-pend-s"></div></div>
+    <div class="kpi p"><div class="kpi-label">Balance Neto</div><div class="kpi-val p" id="k-bal">$0</div><div class="kpi-sub" id="k-bal-s"></div></div>
+  </div>
+
+  <div class="charts-grid cg2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">📊 Ingresos vs Gastos vs Obligaciones</div>
+        <div class="chart-toggle">
+          <button class="ctbtn active" onclick="setChartView('comparativo','anual',this)">Anual</button>
+          <button class="ctbtn" onclick="setChartView('comparativo','mes',this)">Por Mes</button>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="cComparativo"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">🥧 Distribución General</div>
+        <div class="chart-toggle">
+          <button class="ctbtn active" onclick="setChartView('donut','anual',this)">Anual</button>
+          <button class="ctbtn" onclick="setChartView('donut','mes',this)">Por Mes</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="cDonut"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-grid cg3">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">📈 Flujo Neto</div>
+        <div class="chart-toggle">
+          <button class="ctbtn active" onclick="setChartView('flujo','anual',this)">Anual</button>
+          <button class="ctbtn" onclick="setChartView('flujo','mes',this)">Por Mes</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="cFlujo"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🛒 Gastos por Tipo</div>
+      <div class="chart-wrap"><canvas id="cGastoTipo"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📋 Obligaciones por Tipo</div>
+      <div class="chart-wrap"><canvas id="cOblTipo"></canvas></div>
+    </div>
+  </div>
+
+  <!-- BALANCE POR ENTIDAD -->
+  <div id="entidad-box" style="margin-bottom:18px"></div>
+
+  <div class="table-card">
+    <div class="table-header"><h3>Resumen por Mes</h3></div>
+    <table><thead><tr>
+      <th>Mes</th><th>Ingresos</th><th>Gastos</th><th>Obligaciones</th><th>✅ Pagado</th><th>⏳ Pendiente</th><th>Balance</th><th>Estado</th>
+    </tr></thead><tbody id="t-resumen"></tbody></table>
+  </div>
+</div>
+
+<!-- INGRESOS -->
+<div id="tab-ingresos" class="tab-panel">
+  <div class="filter-bar">
+    <label>Mes:</label>
+    <button class="month-btn active" id="im-todos" onclick="setIngFilter('mes','Todos',this)">Todos</button>
+    <button class="month-btn" onclick="setIngFilter('mes','1_ENERO',this)">Ene</button>
+    <button class="month-btn" onclick="setIngFilter('mes','2_FEBRERO',this)">Feb</button>
+    <button class="month-btn" onclick="setIngFilter('mes','3_MARZO',this)">Mar</button>
+    <button class="month-btn" onclick="setIngFilter('mes','4_ABRIL',this)">Abr</button>
+    <button class="month-btn" onclick="setIngFilter('mes','5_MAYO',this)">May</button>
+    <button class="month-btn" onclick="setIngFilter('mes','6_JUNIO',this)">Jun</button>
+    <button class="month-btn" onclick="setIngFilter('mes','7_JULIO',this)">Jul</button>
+    <button class="month-btn" onclick="setIngFilter('mes','8_AGOSTO',this)">Ago</button>
+    <button class="month-btn" onclick="setIngFilter('mes','9_SEPTIEMBRE',this)">Sep</button>
+    <button class="month-btn" onclick="setIngFilter('mes','10_OCTUBRE',this)">Oct</button>
+    <button class="month-btn" onclick="setIngFilter('mes','11_NOVIEMBRE',this)">Nov</button>
+    <button class="month-btn" onclick="setIngFilter('mes','12_DICIEMBRE',this)">Dic</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" id="ing-search" placeholder="🔍 Buscar descripción, entidad..." oninput="buildIngresos()">
+  </div>
+  <div class="table-card">
+    <div class="table-header"><h3>Todos los Ingresos</h3><span id="cnt-ing" style="font-size:11px;color:var(--muted)"></span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>ID</th><th>Mes</th><th>Fecha</th><th>Descripción</th><th>Banco</th><th>Entidad</th><th>Monto</th><th></th></tr></thead>
+      <tbody id="t-ingresos"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- GASTOS -->
+<div id="tab-gastos" class="tab-panel">
+  <div class="filter-bar">
+    <label>Mes:</label>
+    <button class="month-btn active" id="gm-todos" onclick="setGasFilter('mes','Todos',this)">Todos</button>
+    <button class="month-btn" onclick="setGasFilter('mes','1_ENERO',this)">Ene</button>
+    <button class="month-btn" onclick="setGasFilter('mes','2_FEBRERO',this)">Feb</button>
+    <button class="month-btn" onclick="setGasFilter('mes','3_MARZO',this)">Mar</button>
+    <button class="month-btn" onclick="setGasFilter('mes','4_ABRIL',this)">Abr</button>
+    <button class="month-btn" onclick="setGasFilter('mes','5_MAYO',this)">May</button>
+    <button class="month-btn" onclick="setGasFilter('mes','6_JUNIO',this)">Jun</button>
+    <button class="month-btn" onclick="setGasFilter('mes','7_JULIO',this)">Jul</button>
+    <button class="month-btn" onclick="setGasFilter('mes','8_AGOSTO',this)">Ago</button>
+    <button class="month-btn" onclick="setGasFilter('mes','9_SEPTIEMBRE',this)">Sep</button>
+    <button class="month-btn" onclick="setGasFilter('mes','10_OCTUBRE',this)">Oct</button>
+    <button class="month-btn" onclick="setGasFilter('mes','11_NOVIEMBRE',this)">Nov</button>
+    <button class="month-btn" onclick="setGasFilter('mes','12_DICIEMBRE',this)">Dic</button>
+    <label style="margin-left:12px">Estado:</label>
+    <button class="month-btn active" id="ge-todos" onclick="setGasFilter('est','Todos',this)">Todos</button>
+    <button class="month-btn" onclick="setGasFilter('est','Pagado',this)">✅ Pagados</button>
+    <button class="month-btn" onclick="setGasFilter('est','Pendiente',this)">⏳ Pendientes</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" id="gas-search" placeholder="🔍 Buscar descripción, origen, tipo..." oninput="buildGastos()">
+  </div>
+  <div class="table-card">
+    <div class="table-header"><h3>Gastos Detallados</h3><span id="cnt-gas" style="font-size:11px;color:var(--muted)"></span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Mes</th><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Origen</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="t-gastos"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- OBLIGACIONES -->
+<div id="tab-obligaciones" class="tab-panel">
+  <div class="filter-bar">
+    <label>Mes:</label>
+    <button class="month-btn active" id="om-todos" onclick="setOblFilter('mes','Todos',this)">Todos</button>
+    <button class="month-btn" onclick="setOblFilter('mes','1_ENERO',this)">Ene</button>
+    <button class="month-btn" onclick="setOblFilter('mes','2_FEBRERO',this)">Feb</button>
+    <button class="month-btn" onclick="setOblFilter('mes','3_MARZO',this)">Mar</button>
+    <button class="month-btn" onclick="setOblFilter('mes','4_ABRIL',this)">Abr</button>
+    <button class="month-btn" onclick="setOblFilter('mes','5_MAYO',this)">May</button>
+    <button class="month-btn" onclick="setOblFilter('mes','6_JUNIO',this)">Jun</button>
+    <button class="month-btn" onclick="setOblFilter('mes','7_JULIO',this)">Jul</button>
+    <button class="month-btn" onclick="setOblFilter('mes','8_AGOSTO',this)">Ago</button>
+    <button class="month-btn" onclick="setOblFilter('mes','9_SEPTIEMBRE',this)">Sep</button>
+    <button class="month-btn" onclick="setOblFilter('mes','10_OCTUBRE',this)">Oct</button>
+    <button class="month-btn" onclick="setOblFilter('mes','11_NOVIEMBRE',this)">Nov</button>
+    <button class="month-btn" onclick="setOblFilter('mes','12_DICIEMBRE',this)">Dic</button>
+    <label style="margin-left:12px">Estado:</label>
+    <button class="month-btn active" id="oe-todos" onclick="setOblFilter('est','Todos',this)">Todos</button>
+    <button class="month-btn" onclick="setOblFilter('est','Pagado',this)">✅ Pagadas</button>
+    <button class="month-btn" onclick="setOblFilter('est','Pendiente',this)">⏳ Pendientes</button>
+  </div>
+  <div class="search-bar">
+    <input class="search-input" id="obl-search" placeholder="🔍 Buscar descripción, tipo, origen..." oninput="buildObligaciones()">
+  </div>
+  <div class="table-card">
+    <div class="table-header"><h3>Obligaciones Detalladas</h3><span id="cnt-obl" style="font-size:11px;color:var(--muted)"></span></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>ID</th><th>Mes</th><th>Fecha Pago</th><th>Descripción</th><th>Tipo</th><th>Origen</th><th>Monto</th><th>Estado</th><th>Fecha Obligación</th><th></th></tr></thead>
+      <tbody id="t-obligaciones"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- AGREGAR -->
+<div id="tab-agregar" class="tab-panel">
+  <div class="add-form">
+    <h3>➕ Registrar nuevo movimiento</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Tipo</label>
+        <select id="f-tipo" onchange="toggleForm()">
+          <option value="ingreso">Ingreso</option>
+          <option value="gasto">Gasto</option>
+          <option value="obligacion">Obligación</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Mes</label>
+        <select id="f-mes">
+          <option value="1_ENERO">Enero</option><option value="2_FEBRERO">Febrero</option>
+          <option value="3_MARZO">Marzo</option><option value="4_ABRIL">Abril</option>
+          <option value="5_MAYO">Mayo</option><option value="6_JUNIO">Junio</option>
+          <option value="7_JULIO">Julio</option><option value="8_AGOSTO">Agosto</option>
+          <option value="9_SEPTIEMBRE">Septiembre</option><option value="10_OCTUBRE">Octubre</option>
+          <option value="11_NOVIEMBRE">Noviembre</option><option value="12_DICIEMBRE">Diciembre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha</label><input type="date" id="f-fecha"></div>
+      <div class="form-group"><label>Descripción *</label><input type="text" id="f-desc" placeholder="Ej: Nómina Oscar"></div>
+      <div class="form-group"><label>Origen / Banco *</label><input type="text" id="f-origen" placeholder="Ej: SNR, TSG"></div>
+      <div class="form-group" id="fg-ent"><label>Entidad</label><input type="text" id="f-entidad" placeholder="Ej: Banco Bogotá"></div>
+      <div class="form-group" id="fg-cat"><label>Tipo / Categoría</label>
+        <select id="f-cat">
+          <option>Mercado</option><option>Transporte</option><option>Mascotas</option><option>Otros</option>
+          <option>GYM</option><option>Educacion</option><option>Credito</option><option>Ahorro</option>
+          <option>Alquiler</option><option>Servicio Publico</option><option>Telefonia e Internet</option>
+          <option>Seguridad Social</option><option>Administracion</option><option>Parqueadero</option>
+          <option>Salud Mascotas</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Monto (COP) *</label><input type="number" id="f-monto" placeholder="0"></div>
+      <div class="form-group" id="fg-est"><label>Estado</label>
+        <select id="f-estado"><option value="Pagado">✅ Pagado</option><option value="Pendiente">⏳ Pendiente</option></select>
+      </div>
+    </div>
+    <button class="btn-add" onclick="agregarRegistro()">Guardar Registro</button>
+    <div class="alert" id="f-alert"></div>
+  </div>
+  <div class="table-card">
+    <div class="table-header"><h3>Registros añadidos en esta sesión</h3></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Tipo</th><th>Mes</th><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Origen</th><th>Monto</th><th>Estado</th></tr></thead>
+      <tbody id="t-nuevos"></tbody></table>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// ═══════════════ DATA ═══════════════
+const ING=[
+  {id:'OSC1',mes:'1_ENERO',fecha:'24/12/2025',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SNR',monto:2795000},
+  {id:'MARI1',mes:'1_ENERO',fecha:'29/12/2025',desc:'Nomina Mariana',banco:'Bogotá',entidad:'TSG',monto:2969372},
+  {id:'SUB',mes:'1_ENERO',fecha:'14/01/2026',desc:'Subsidio',banco:'Bogotá',entidad:'Colsubsidio',monto:130000},
+  {id:'EMP',mes:'1_ENERO',fecha:'20/01/2026',desc:'PSvita',banco:'Bogotá',entidad:'La cumana',monto:150000},
+  {id:'CR1',mes:'1_ENERO',fecha:'21/01/2026',desc:'Credito 4464',banco:'Bogotá',entidad:'Banco de Bogota',monto:3000000},
+  {id:'OSC1',mes:'2_FEBRERO',fecha:'10/02/2026',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SNR',monto:2008000},
+  {id:'MARI1',mes:'2_FEBRERO',fecha:'29/01/2026',desc:'Nomina Mariana',banco:'Bogotá',entidad:'TSG',monto:3348919},
+  {id:'OSC2',mes:'2_FEBRERO',fecha:'',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SDA',monto:230000},
+  {id:'SUB',mes:'2_FEBRERO',fecha:'29/01/2026',desc:'Subsidio',banco:'Bogotá',entidad:'Colsubsidio',monto:130000},
+  {id:'TCKT',mes:'2_FEBRERO',fecha:'31/01/2026',desc:'TC K-tronix',banco:'Bogotá',entidad:'K-tronix',monto:5000000},
+  {id:'OSC1',mes:'3_MARZO',fecha:'',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SNR',monto:3300000},
+  {id:'MARI1',mes:'3_MARZO',fecha:'',desc:'Nomina Mariana',banco:'Bogotá',entidad:'TSG',monto:2969372},
+  {id:'OSC2',mes:'3_MARZO',fecha:'',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SDA',monto:3450000},
+  {id:'SUB',mes:'3_MARZO',fecha:'26/02/2026',desc:'Subsidio',banco:'Bogotá',entidad:'Colsubsidio',monto:146200},
+  {id:'OSC1',mes:'4_ABRIL',fecha:'',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SNR',monto:3300000},
+  {id:'MARI1',mes:'4_ABRIL',fecha:'',desc:'Nomina Mariana',banco:'Bogotá',entidad:'TSG',monto:2969372},
+  {id:'OSC2',mes:'4_ABRIL',fecha:'',desc:'Nomina Oscar',banco:'Bogotá',entidad:'SDA',monto:3450000},
+  {id:'SUB',mes:'4_ABRIL',fecha:'',desc:'Subsidio',banco:'Bogotá',entidad:'Colsubsidio',monto:130000},
+];
+
+const OBL=[
+  {id:'ADM1',mes:'1_ENERO',fp:'14/01/2026',desc:'CIUDADELA LA LIBERTAD 2',tipo:'Administracion',origen:'Subsidio',monto:86000,est:'Pagado',fo:'10/01/2026'},
+  {id:'AH1',mes:'1_ENERO',fp:'30/12/2025',desc:'F Nacional Ahorro',tipo:'Ahorro',origen:'TSG',monto:200000,est:'Pagado',fo:'01/01/2026'},
+  {id:'ARR1',mes:'1_ENERO',fp:'27/12/2025',desc:'ARRIENDO',tipo:'Alquiler',origen:'SNR',monto:532000,est:'Pagado',fo:'05/01/2026'},
+  {id:'CR3',mes:'1_ENERO',fp:'1/01/2026',desc:'TC 8307',tipo:'Credito',origen:'TSG',monto:487844,est:'Pagado',fo:'01/01/2026'},
+  {id:'CR4',mes:'1_ENERO',fp:'27/12/2025',desc:'CR 857292162',tipo:'Credito',origen:'SNR',monto:444000,est:'Pagado',fo:'16/01/2026'},
+  {id:'CR1',mes:'1_ENERO',fp:'30/12/2025',desc:'CR 855366780',tipo:'Credito',origen:'TSG',monto:350527,est:'Pagado',fo:'16/01/2026'},
+  {id:'CR2',mes:'1_ENERO',fp:'30/12/2025',desc:'CR 1059039849',tipo:'Credito',origen:'TSG',monto:297385,est:'Pagado',fo:'16/01/2026'},
+  {id:'CR6',mes:'1_ENERO',fp:'27/12/2025',desc:'CR 955362748',tipo:'Credito',origen:'SNR',monto:232000,est:'Pagado',fo:'16/01/2026'},
+  {id:'CR5',mes:'1_ENERO',fp:'27/12/2025',desc:'CR 954688515',tipo:'Credito',origen:'SNR',monto:203000,est:'Pagado',fo:'16/01/2026'},
+  {id:'EDU1',mes:'1_ENERO',fp:'2/01/2026',desc:'MATRICULA PREDESALUD',tipo:'Educacion',origen:'TSG',monto:324400,est:'Pagado',fo:'02/01/2026'},
+  {id:'ADM2',mes:'1_ENERO',fp:'14/01/2026',desc:'PARQUEADERO CIUDADELA',tipo:'Parqueadero',origen:'Subsidio',monto:36000,est:'Pagado',fo:'10/01/2026'},
+  {id:'SS1',mes:'1_ENERO',fp:'27/12/2025',desc:'COMPENSAR',tipo:'Seguridad Social',origen:'SNR',monto:502000,est:'Pagado',fo:'01/01/2026'},
+  {id:'SP1',mes:'1_ENERO',fp:'21/01/2026',desc:'ACUEDUCTO',tipo:'Servicio Publico',origen:'Credito 4464',monto:90544,est:'Pagado',fo:'30/01/2026'},
+  {id:'SP2',mes:'1_ENERO',fp:'21/01/2026',desc:'CODENSA',tipo:'Servicio Publico',origen:'Credito 4464',monto:78730,est:'Pagado',fo:'27/01/2026'},
+  {id:'SP3',mes:'1_ENERO',fp:'21/01/2026',desc:'VANTI',tipo:'Servicio Publico',origen:'Credito 4464',monto:49410,est:'Pagado',fo:'27/01/2026'},
+  {id:'SPV1',mes:'1_ENERO',fp:'4/01/2026',desc:'CLARO HOGAR',tipo:'Telefonia e Internet',origen:'TSG',monto:86848,est:'Pagado',fo:'15/01/2026'},
+  {id:'SPV3',mes:'1_ENERO',fp:'21/01/2026',desc:'CLARO MARIANA',tipo:'Telefonia e Internet',origen:'Credito 4464',monto:152860,est:'Pagado',fo:'21/01/2026'},
+  {id:'SPV2',mes:'1_ENERO',fp:'21/01/2026',desc:'CLARO OSCAR',tipo:'Telefonia e Internet',origen:'Credito 4464',monto:75500,est:'Pagado',fo:'18/01/2026'},
+  {id:'ADM1',mes:'2_FEBRERO',fp:'30/01/2026',desc:'CIUDADELA LA LIBERTAD 2',tipo:'Administracion',origen:'TSG',monto:68000,est:'Pagado',fo:'10/01/2026'},
+  {id:'AH1',mes:'2_FEBRERO',fp:'29/01/2026',desc:'F Nacional Ahorro',tipo:'Ahorro',origen:'TSG',monto:200000,est:'Pagado',fo:'01/02/2026'},
+  {id:'ARR1',mes:'2_FEBRERO',fp:'29/01/2026',desc:'ARRIENDO',tipo:'Alquiler',origen:'TSG',monto:514000,est:'Pagado',fo:'05/02/2026'},
+  {id:'EDU1',mes:'2_FEBRERO',fp:'24/02/2026',desc:'CUOTA PREDESALUD',tipo:'Educacion',origen:'SNR',monto:190000,est:'Pagado',fo:'25/02/2026'},
+  {id:'ADM2',mes:'2_FEBRERO',fp:'30/01/2026',desc:'PARQUEADERO CIUDADELA',tipo:'Parqueadero',origen:'TSG',monto:36000,est:'Pagado',fo:'10/01/2026'},
+  {id:'-',mes:'2_FEBRERO',fp:'10/02/2026',desc:'BICICLETERO',tipo:'Parqueadero',origen:'Subsidio',monto:6000,est:'Pagado',fo:'10/02/2026'},
+  {id:'EPS',mes:'2_FEBRERO',fp:'',desc:'EPS AZUCA',tipo:'Salud Mascotas',origen:'SNR',monto:100000,est:'Pendiente',fo:'24/01/2026'},
+  {id:'SS1',mes:'2_FEBRERO',fp:'29/01/2026',desc:'COMPENSAR',tipo:'Seguridad Social',origen:'TSG',monto:520976,est:'Pagado',fo:'01/02/2026'},
+  {id:'SP2',mes:'2_FEBRERO',fp:'18/02/2026',desc:'CODENSA',tipo:'Servicio Publico',origen:'SNR',monto:63940,est:'Pagado',fo:'16/02/2026'},
+  {id:'SP3',mes:'2_FEBRERO',fp:'15/02/2026',desc:'VANTI',tipo:'Servicio Publico',origen:'SNR',monto:45570,est:'Pagado',fo:'16/02/2026'},
+  {id:'SPV1',mes:'2_FEBRERO',fp:'10/02/2026',desc:'CLARO HOGAR',tipo:'Telefonia e Internet',origen:'SNR',monto:86626,est:'Pagado',fo:'15/02/2026'},
+  {id:'SPV3',mes:'2_FEBRERO',fp:'15/02/2026',desc:'CLARO MARIANA',tipo:'Telefonia e Internet',origen:'SNR',monto:143086,est:'Pagado',fo:'21/02/2026'},
+  {id:'SPV2',mes:'2_FEBRERO',fp:'15/02/2026',desc:'CLARO OSCAR',tipo:'Telefonia e Internet',origen:'SNR',monto:63000,est:'Pagado',fo:'18/02/2026'},
+  // MARZO — Pendientes
+  {id:'ADM1',mes:'3_MARZO',fp:'',desc:'CIUDADELA LA LIBERTAD 2',tipo:'Administracion',origen:'TSG',monto:86000,est:'Pendiente',fo:'10/03/2026'},
+  {id:'AH1',mes:'3_MARZO',fp:'',desc:'F Nacional Ahorro',tipo:'Ahorro',origen:'TSG',monto:200000,est:'Pendiente',fo:'01/03/2026'},
+  {id:'ARR2',mes:'3_MARZO',fp:'',desc:'FIC Sumar 1569956',tipo:'Ahorro',origen:'TSG',monto:400000,est:'Pendiente',fo:'15/03/2026'},
+  {id:'ARR1',mes:'3_MARZO',fp:'',desc:'ARRIENDO',tipo:'Alquiler',origen:'TSG',monto:514000,est:'Pendiente',fo:'05/03/2026'},
+  {id:'CR3',mes:'3_MARZO',fp:'',desc:'TC 8307',tipo:'Credito',origen:'SDA',monto:487844,est:'Pendiente',fo:'01/03/2026'},
+  {id:'CR4',mes:'3_MARZO',fp:'',desc:'CR 857292162',tipo:'Credito',origen:'SNR',monto:444000,est:'Pendiente',fo:'16/03/2026'},
+  {id:'CR1',mes:'3_MARZO',fp:'',desc:'CR 855366780',tipo:'Credito',origen:'SNR',monto:350527,est:'Pendiente',fo:'16/03/2026'},
+  {id:'CR2',mes:'3_MARZO',fp:'',desc:'CR 1059039849',tipo:'Credito',origen:'SNR',monto:297385,est:'Pendiente',fo:'16/03/2026'},
+  {id:'CR6',mes:'3_MARZO',fp:'',desc:'CR 955362748',tipo:'Credito',origen:'SNR',monto:232000,est:'Pendiente',fo:'16/03/2026'},
+  {id:'CR5',mes:'3_MARZO',fp:'',desc:'CR 954688515',tipo:'Credito',origen:'SNR',monto:237000,est:'Pendiente',fo:'16/03/2026'},
+  {id:'CR7',mes:'3_MARZO',fp:'',desc:'CR 01155474464',tipo:'Credito',origen:'SDA',monto:162000,est:'Pendiente',fo:'16/03/2026'},
+  {id:'TCKT',mes:'3_MARZO',fp:'',desc:'TC K-tronix',tipo:'Credito',origen:'SDA',monto:200000,est:'Pendiente',fo:'18/03/2026'},
+  {id:'EDU1',mes:'3_MARZO',fp:'',desc:'CUOTA PREDESALUD',tipo:'Educacion',origen:'SNR',monto:190000,est:'Pendiente',fo:'25/03/2026'},
+  {id:'ADM2',mes:'3_MARZO',fp:'',desc:'PARQUEADERO CIUDADELA',tipo:'Parqueadero',origen:'SNR',monto:36000,est:'Pendiente',fo:'10/03/2026'},
+  {id:'-',mes:'3_MARZO',fp:'',desc:'BICICLETERO',tipo:'Parqueadero',origen:'TSG',monto:6000,est:'Pendiente',fo:'10/03/2026'},
+  {id:'EPS',mes:'3_MARZO',fp:'',desc:'EPS AZUCA',tipo:'Salud Mascotas',origen:'SNR',monto:100000,est:'Pendiente',fo:'24/03/2026'},
+  {id:'SS1',mes:'3_MARZO',fp:'',desc:'COMPENSAR',tipo:'Seguridad Social',origen:'TSG',monto:511000,est:'Pendiente',fo:'01/03/2026'},
+  {id:'SP2',mes:'3_MARZO',fp:'',desc:'CODENSA',tipo:'Servicio Publico',origen:'SNR',monto:84210,est:'Pendiente',fo:'16/03/2026'},
+  {id:'SP3',mes:'3_MARZO',fp:'',desc:'VANTI',tipo:'Servicio Publico',origen:'SNR',monto:42000,est:'Pendiente',fo:'16/03/2026'},
+  {id:'SPV1',mes:'3_MARZO',fp:'',desc:'CLARO HOGAR',tipo:'Telefonia e Internet',origen:'SNR',monto:86848,est:'Pendiente',fo:'15/03/2026'},
+  {id:'SPV3',mes:'3_MARZO',fp:'',desc:'CLARO MARIANA',tipo:'Telefonia e Internet',origen:'SNR',monto:151985,est:'Pendiente',fo:'21/03/2026'},
+  {id:'SPV2',mes:'3_MARZO',fp:'',desc:'CLARO OSCAR',tipo:'Telefonia e Internet',origen:'SNR',monto:86528,est:'Pendiente',fo:'18/03/2026'},
+  // ABRIL — Pendientes
+  {id:'ADM1',mes:'4_ABRIL',fp:'',desc:'CIUDADELA LA LIBERTAD 2',tipo:'Administracion',origen:'TSG',monto:86000,est:'Pendiente',fo:'10/04/2026'},
+  {id:'AH1',mes:'4_ABRIL',fp:'',desc:'F Nacional Ahorro',tipo:'Ahorro',origen:'TSG',monto:200000,est:'Pendiente',fo:'01/04/2026'},
+  {id:'ARR2',mes:'4_ABRIL',fp:'',desc:'FIC Sumar 1569956',tipo:'Ahorro',origen:'TSG',monto:400000,est:'Pendiente',fo:'15/04/2026'},
+  {id:'ARR1',mes:'4_ABRIL',fp:'',desc:'ARRIENDO',tipo:'Alquiler',origen:'TSG',monto:514000,est:'Pendiente',fo:'05/04/2026'},
+  {id:'CR3',mes:'4_ABRIL',fp:'',desc:'TC 8307',tipo:'Credito',origen:'SDA',monto:487844,est:'Pendiente',fo:'01/04/2026'},
+  {id:'CR4',mes:'4_ABRIL',fp:'',desc:'CR 857292162',tipo:'Credito',origen:'SNR',monto:444000,est:'Pendiente',fo:'16/04/2026'},
+  {id:'CR1',mes:'4_ABRIL',fp:'',desc:'CR 855366780',tipo:'Credito',origen:'SNR',monto:350527,est:'Pendiente',fo:'16/04/2026'},
+  {id:'CR2',mes:'4_ABRIL',fp:'',desc:'CR 1059039849',tipo:'Credito',origen:'SNR',monto:297385,est:'Pendiente',fo:'16/04/2026'},
+  {id:'CR6',mes:'4_ABRIL',fp:'',desc:'CR 955362748',tipo:'Credito',origen:'SNR',monto:232000,est:'Pendiente',fo:'16/04/2026'},
+  {id:'CR5',mes:'4_ABRIL',fp:'',desc:'CR 954688515',tipo:'Credito',origen:'SNR',monto:237000,est:'Pendiente',fo:'16/04/2026'},
+  {id:'CR7',mes:'4_ABRIL',fp:'',desc:'CR 01155474464',tipo:'Credito',origen:'SDA',monto:162000,est:'Pendiente',fo:'16/04/2026'},
+  {id:'TCKT',mes:'4_ABRIL',fp:'',desc:'TC K-tronix',tipo:'Credito',origen:'SDA',monto:200000,est:'Pendiente',fo:'18/04/2026'},
+  {id:'EDU1',mes:'4_ABRIL',fp:'',desc:'CUOTA PREDESALUD',tipo:'Educacion',origen:'SNR',monto:190000,est:'Pendiente',fo:'25/04/2026'},
+  {id:'ADM2',mes:'4_ABRIL',fp:'',desc:'PARQUEADERO CIUDADELA',tipo:'Parqueadero',origen:'SNR',monto:36000,est:'Pendiente',fo:'10/04/2026'},
+  {id:'-',mes:'4_ABRIL',fp:'',desc:'BICICLETERO',tipo:'Parqueadero',origen:'TSG',monto:6000,est:'Pendiente',fo:'10/04/2026'},
+  {id:'EPS',mes:'4_ABRIL',fp:'',desc:'EPS AZUCA',tipo:'Salud Mascotas',origen:'SNR',monto:100000,est:'Pendiente',fo:'24/04/2026'},
+  {id:'SS1',mes:'4_ABRIL',fp:'',desc:'COMPENSAR',tipo:'Seguridad Social',origen:'TSG',monto:511000,est:'Pendiente',fo:'01/04/2026'},
+  {id:'SP1',mes:'4_ABRIL',fp:'',desc:'ACUEDUCTO',tipo:'Servicio Publico',origen:'TSG',monto:90544,est:'Pendiente',fo:'30/04/2026'},
+  {id:'SP2',mes:'4_ABRIL',fp:'',desc:'CODENSA',tipo:'Servicio Publico',origen:'SNR',monto:84210,est:'Pendiente',fo:'16/04/2026'},
+  {id:'SP3',mes:'4_ABRIL',fp:'',desc:'VANTI',tipo:'Servicio Publico',origen:'SNR',monto:42000,est:'Pendiente',fo:'16/04/2026'},
+  {id:'SPV1',mes:'4_ABRIL',fp:'',desc:'CLARO HOGAR',tipo:'Telefonia e Internet',origen:'SNR',monto:86848,est:'Pendiente',fo:'15/04/2026'},
+  {id:'SPV3',mes:'4_ABRIL',fp:'',desc:'CLARO MARIANA',tipo:'Telefonia e Internet',origen:'SNR',monto:151985,est:'Pendiente',fo:'21/04/2026'},
+  {id:'SPV2',mes:'4_ABRIL',fp:'',desc:'CLARO OSCAR',tipo:'Telefonia e Internet',origen:'SNR',monto:86528,est:'Pendiente',fo:'18/04/2026'},
+];
+
+const GAS=[
+  // ENERO
+  {mes:'1_ENERO',fecha:'20/01/2026',desc:'Arena Gatos',origen:'Emp PSVITA',tipo:'Mascotas',monto:30000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'04/01/2026',desc:'Comida Perro 1',origen:'TSG',tipo:'Mascotas',monto:35000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Comida Perro 2',origen:'Credito 4464',tipo:'Mascotas',monto:37000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'04/01/2026',desc:'Comida Gatos 1',origen:'TSG',tipo:'Mascotas',monto:40000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'20/01/2026',desc:'Comida Gatos 2',origen:'Emp PSVITA',tipo:'Mascotas',monto:40000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'24/01/2026',desc:'EPS AZUCA',origen:'Credito 4464',tipo:'Mascotas',monto:202000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Mercado Metropol Mariana',origen:'TSG',tipo:'Mercado',monto:509400,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'22/01/2026',desc:'Carne Oscar',origen:'Credito 4464',tipo:'Mercado',monto:178600,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'22/01/2026',desc:'Mercado Metropol Oscar',origen:'Credito 4464',tipo:'Mercado',monto:132925,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Huevos Mariana',origen:'TSG',tipo:'Mercado',monto:55000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Diario 2',origen:'TSG',tipo:'Mercado',monto:51000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Verduras',origen:'TSG',tipo:'Mercado',monto:40000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Pollo',origen:'TSG',tipo:'Mercado',monto:34500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'30/12/2025',desc:'Diario 2',origen:'SNR',tipo:'Mercado',monto:24000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Diario',origen:'SNR',tipo:'Mercado',monto:22500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'28/12/2025',desc:'Diario',origen:'SNR',tipo:'Mercado',monto:17500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Diario',origen:'SNR',tipo:'Mercado',monto:13000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'21/01/2026',desc:'Salida Cine',origen:'Credito 4464',tipo:'Otros',monto:274100,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Compra Temu',origen:'Credito 4464',tipo:'Otros',monto:200500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'21/01/2026',desc:'Boleta DEATH',origen:'Credito 4464',tipo:'Otros',monto:200000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'24/12/2025',desc:'Cena Navideña',origen:'SNR',tipo:'Otros',monto:200000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Bicicleta Sofia',origen:'Credito 4464',tipo:'Otros',monto:190000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Empeño Psvita',origen:'SNR',tipo:'Otros',monto:165000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'24/12/2025',desc:'Compra Metropol',origen:'SNR',tipo:'Otros',monto:144300,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Chaqueta Moto',origen:'Credito 4464',tipo:'Otros',monto:130000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'22/01/2026',desc:'Sudadera Melissa',origen:'Credito 4464',tipo:'Otros',monto:110000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Tenis Melissa',origen:'Credito 4464',tipo:'Otros',monto:90000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'KFC',origen:'SNR',tipo:'Otros',monto:87500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'21/01/2026',desc:'Almuerzos',origen:'Credito 4464',tipo:'Otros',monto:77000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Compra Metropol',origen:'TSG',tipo:'Otros',monto:72000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Picada Carne',origen:'Credito 4464',tipo:'Otros',monto:68000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'23/01/2026',desc:'Poliza SDA',origen:'Credito 4464',tipo:'Otros',monto:66000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Pantalon Mariana',origen:'Credito 4464',tipo:'Otros',monto:65000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'4/01/2026',desc:'Arroz Chino',origen:'TSG',tipo:'Otros',monto:60000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'3/01/2026',desc:'Examen Ocupacional',origen:'TSG',tipo:'Otros',monto:60000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'31/12/2025',desc:'Carne y Ajo',origen:'TSG',tipo:'Otros',monto:45760,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Cambio de aceite moto',origen:'SNR',tipo:'Otros',monto:45000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'',desc:'Gel Rizos',origen:'Credito 4464',tipo:'Otros',monto:38500,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'28/12/2025',desc:'Desayuno',origen:'SNR',tipo:'Otros',monto:33050,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Tamales',origen:'Credito 4464',tipo:'Otros',monto:30000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Medicina azuka',origen:'Credito 4464',tipo:'Otros',monto:26000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'23/01/2026',desc:'Desayunos',origen:'Credito 4464',tipo:'Otros',monto:25000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'30/12/2025',desc:'Almuerzo',origen:'TSG',tipo:'Otros',monto:20000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Lavada Moto',origen:'SNR',tipo:'Otros',monto:20000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Corte de Cabello Oscar',origen:'Credito 4464',tipo:'Otros',monto:15000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'21/01/2026',desc:'Aretes',origen:'Credito 4464',tipo:'Otros',monto:15000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'30/12/2025',desc:'Spotify',origen:'TSG',tipo:'Otros',monto:9300,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Pedialyte',origen:'SNR',tipo:'Otros',monto:9000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Parqueadero Moto',origen:'SNR',tipo:'Otros',monto:7000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Cita Odontologica Sofia',origen:'SNR',tipo:'Otros',monto:6200,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Cita Psicologia Melissa',origen:'SNR',tipo:'Otros',monto:4700,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'22/01/2026',desc:'Pasajes Oscar',origen:'Credito 4464',tipo:'Transporte',monto:50000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'25/01/2026',desc:'Pasajes Sofia',origen:'Credito 4464',tipo:'Transporte',monto:25300,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'16/01/2026',desc:'Combustible',origen:'Credito 4464',tipo:'Transporte',monto:26000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'23/01/2026',desc:'Combustible',origen:'Credito 4464',tipo:'Transporte',monto:25000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'30/12/2025',desc:'Combustible',origen:'TSG',tipo:'Transporte',monto:22000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'28/01/2026',desc:'Combustible',origen:'Credito 4464',tipo:'Transporte',monto:20000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'26/12/2025',desc:'Pasajes',origen:'SNR',tipo:'Transporte',monto:15000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Picap moto vuelta',origen:'SNR',tipo:'Transporte',monto:14000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'27/12/2025',desc:'Picap moto ida',origen:'SNR',tipo:'Transporte',monto:14000,est:'Pagado'},
+  {mes:'1_ENERO',fecha:'8/01/2026',desc:'Combustible',origen:'TSG',tipo:'Transporte',monto:24000,est:'Pagado'},
+  // FEBRERO
+  {mes:'2_FEBRERO',fecha:'10/02/2026',desc:'Escuela Deportiva Melissa',origen:'SNR',tipo:'Educacion',monto:62000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'03/02/2026',desc:'GYM OSCAR',origen:'TSG',tipo:'GYM',monto:120000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'06/02/2026',desc:'Comida Perro 1',origen:'Subsidio',tipo:'Mascotas',monto:35600,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'',desc:'Comida Perro 2',origen:'SNR',tipo:'Mascotas',monto:35000,est:'Pendiente'},
+  {mes:'2_FEBRERO',fecha:'06/02/2026',desc:'Comida Gatos 1',origen:'Subsidio',tipo:'Mascotas',monto:36200,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'22/02/2026',desc:'Comida Gatos 2',origen:'SNR',tipo:'Mascotas',monto:42800,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'16/02/2026',desc:'Arena Gatos',origen:'SNR',tipo:'Mascotas',monto:29000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Mercado Metropol Mariana',origen:'TSG',tipo:'Mercado',monto:540000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'16/02/2026',desc:'Carne 2',origen:'SNR',tipo:'Mercado',monto:185700,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Mercado Metropol Oscar',origen:'SNR',tipo:'Mercado',monto:155400,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'02/02/2026',desc:'Carne 1',origen:'TSG',tipo:'Mercado',monto:177000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Diario 1',origen:'TSG',tipo:'Mercado',monto:100000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'16/02/2026',desc:'Diario 2',origen:'SNR',tipo:'Mercado',monto:90918,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'02/02/2026',desc:'Huevos Mariana',origen:'TSG',tipo:'Mercado',monto:46000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'01/02/2026',desc:'Compra Metropol',origen:'TSG',tipo:'Mercado',monto:41000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'16/02/2026',desc:'Huevos Oscar',origen:'SNR',tipo:'Mercado',monto:34500,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Port 15" HP',origen:'K-tronix',tipo:'Otros',monto:2617070,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'14/02/2026',desc:'Materiales Sofia',origen:'SNR',tipo:'Otros',monto:313600,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Licuadora Ninja',origen:'K-tronix',tipo:'Otros',monto:399900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Monitor 24" Samsung',origen:'K-tronix',tipo:'Otros',monto:429930,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Utiles Escolares',origen:'TSG',tipo:'Otros',monto:185500,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'21/02/2026',desc:'Almuerzo con Floralba',origen:'K-tronix',tipo:'Otros',monto:170000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'',desc:'Empeño Psvita',origen:'SNR',tipo:'Otros',monto:165000,est:'Pendiente'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Telefono Panasonic',origen:'K-tronix',tipo:'Otros',monto:152900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Camara Ezviz',origen:'K-tronix',tipo:'Otros',monto:129900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Psicologia Sofia',origen:'TSG',tipo:'Otros',monto:120000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Almuerzos',origen:'TSG',tipo:'Otros',monto:78800,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'14/02/2026',desc:'Salida Plaza Claro',origen:'SNR',tipo:'Otros',monto:77200,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'12/02/2026',desc:'Suscripcion Cloud',origen:'SNR',tipo:'Otros',monto:75000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'3/02/2026',desc:'Bicicleta Sofia',origen:'TSG',tipo:'Otros',monto:90000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'14/02/2026',desc:'Salida Escuela Baloncesto',origen:'SNR',tipo:'Otros',monto:58800,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Comida',origen:'TSG',tipo:'Otros',monto:56000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Picada Carne',origen:'TSG',tipo:'Otros',monto:55000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Teclado Inalambrico',origen:'K-tronix',tipo:'Otros',monto:49900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'29/01/2026',desc:'Comida Perros',origen:'TSG',tipo:'Otros',monto:47000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Mouse Maxell',origen:'K-tronix',tipo:'Otros',monto:89900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Arroz Chino',origen:'TSG',tipo:'Otros',monto:39000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Pollo',origen:'SNR',tipo:'Otros',monto:35000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Uniforme Melissa',origen:'SNR',tipo:'Otros',monto:60000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'12/02/2026',desc:'Almuerzos y Break',origen:'SNR',tipo:'Otros',monto:30000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Fotos Grado',origen:'TSG',tipo:'Otros',monto:20000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Chips',origen:'TSG',tipo:'Otros',monto:18000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'08/02/2026',desc:'Libro Monosilabo',origen:'Subsidio',tipo:'Otros',monto:17000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'21/02/2026',desc:'Onces tarde',origen:'SNR',tipo:'Otros',monto:15000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'01/02/2026',desc:'Sticker',origen:'TSG',tipo:'Otros',monto:15000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Desayuno',origen:'TSG',tipo:'Otros',monto:12000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Medicina',origen:'SNR',tipo:'Otros',monto:11000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'01/02/2026',desc:'Recogidas Melissa',origen:'TSG',tipo:'Otros',monto:10000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'18/02/2026',desc:'Bata Sofia',origen:'SNR',tipo:'Otros',monto:7500,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'01/02/2026',desc:'Fotos Escolares',origen:'TSG',tipo:'Otros',monto:6024,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'02/02/2026',desc:'Recarga celular Sofia',origen:'TSG',tipo:'Otros',monto:5889,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Bolsa Kambrel',origen:'K-tronix',tipo:'Otros',monto:2200,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'29/01/2026',desc:'Lisia',origen:'TSG',tipo:'Otros',monto:21500,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Tienda puente largo',origen:'TSG',tipo:'Otros',monto:24000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Salida Escuela Baloncesto 2',origen:'SNR',tipo:'Otros',monto:8000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'30/01/2026',desc:'Pasajes Sofia 1',origen:'TSG',tipo:'Transporte',monto:60000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'01/02/2026',desc:'Pasajes Oscar 1',origen:'TSG',tipo:'Transporte',monto:50230,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Pasajes Oscar 2',origen:'SNR',tipo:'Transporte',monto:50230,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'31/01/2026',desc:'Taxis',origen:'TSG',tipo:'Transporte',monto:42000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'21/02/2026',desc:'Combustible 4',origen:'SNR',tipo:'Transporte',monto:27000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'16/02/2026',desc:'Combustible 3',origen:'SNR',tipo:'Transporte',monto:26900,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'10/02/2026',desc:'Combustible 2',origen:'Subsidio',tipo:'Transporte',monto:26000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'3/02/2026',desc:'Combustible 1',origen:'TSG',tipo:'Transporte',monto:30000,est:'Pagado'},
+  {mes:'2_FEBRERO',fecha:'15/02/2026',desc:'Pasajes Sofia 2',origen:'SNR',tipo:'Transporte',monto:20230,est:'Pagado'},
+  // MARZO — Pendiente
+  {mes:'3_MARZO',fecha:'',desc:'GYM OSCAR',origen:'TSG',tipo:'GYM',monto:120000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Comida Perro 1',origen:'TSG',tipo:'Mascotas',monto:35000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Comida Gatos 1',origen:'TSG',tipo:'Mascotas',monto:40000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Comida Perro 2',origen:'SNR',tipo:'Mascotas',monto:35000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Comida Gatos 2',origen:'SNR',tipo:'Mascotas',monto:40000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Arena Gatos',origen:'SNR',tipo:'Mascotas',monto:50000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Mercado Metropol Mariana',origen:'TSG',tipo:'Mercado',monto:500000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Mercado Metropol Oscar',origen:'SDA',tipo:'Mercado',monto:500000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Carne 1',origen:'TSG',tipo:'Mercado',monto:250000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Carne 2',origen:'SNR',tipo:'Mercado',monto:250000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Diario 1',origen:'TSG',tipo:'Mercado',monto:100000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Diario 2',origen:'SNR',tipo:'Mercado',monto:100000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Huevos Mariana',origen:'TSG',tipo:'Mercado',monto:55000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Huevos Oscar',origen:'SNR',tipo:'Mercado',monto:55000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Papas',origen:'SNR',tipo:'Mercado',monto:50000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Psicologia Sofia',origen:'Subsidio',tipo:'Otros',monto:120000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Pasajes Oscar 1',origen:'TSG',tipo:'Transporte',monto:50230,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Pasajes Sofia 1',origen:'TSG',tipo:'Transporte',monto:60000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Pasajes Oscar 2',origen:'SNR',tipo:'Transporte',monto:50230,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Pasajes Sofia 2',origen:'SNR',tipo:'Transporte',monto:60000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Combustible 1',origen:'TSG',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Combustible 2',origen:'TSG',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Combustible 3',origen:'SNR',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'3_MARZO',fecha:'',desc:'Combustible 4',origen:'SNR',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  // ABRIL — Pendiente
+  {mes:'4_ABRIL',fecha:'',desc:'GYM OSCAR',origen:'TSG',tipo:'GYM',monto:120000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Comida Perro 1',origen:'TSG',tipo:'Mascotas',monto:35000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Comida Gatos 1',origen:'TSG',tipo:'Mascotas',monto:40000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Comida Perro 2',origen:'SNR',tipo:'Mascotas',monto:35000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Comida Gatos 2',origen:'SNR',tipo:'Mascotas',monto:40000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Arena Gatos',origen:'SNR',tipo:'Mascotas',monto:50000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Mercado Metropol Mariana',origen:'TSG',tipo:'Mercado',monto:500000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Mercado Metropol Oscar',origen:'SDA',tipo:'Mercado',monto:500000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Carne 1',origen:'TSG',tipo:'Mercado',monto:250000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Carne 2',origen:'SNR',tipo:'Mercado',monto:250000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Diario 1',origen:'TSG',tipo:'Mercado',monto:100000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Diario 2',origen:'SNR',tipo:'Mercado',monto:83500,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Huevos Mariana',origen:'TSG',tipo:'Mercado',monto:55000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Huevos Oscar',origen:'SNR',tipo:'Mercado',monto:55000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Papas',origen:'SNR',tipo:'Mercado',monto:50000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Psicologia Sofia',origen:'Subsidio',tipo:'Otros',monto:120000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Pasajes Oscar 1',origen:'TSG',tipo:'Transporte',monto:50230,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Pasajes Sofia 1',origen:'TSG',tipo:'Transporte',monto:60000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Pasajes Oscar 2',origen:'SNR',tipo:'Transporte',monto:50230,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Pasajes Sofia 2',origen:'SNR',tipo:'Transporte',monto:60000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Combustible 1',origen:'TSG',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Combustible 2',origen:'TSG',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Combustible 3',origen:'SNR',tipo:'Transporte',monto:30000,est:'Pendiente'},
+  {mes:'4_ABRIL',fecha:'',desc:'Combustible 4',origen:'SNR',tipo:'Transporte',monto:30000,est:'Pendiente'},
+];
+
+const ML={'1_ENERO':'Enero','2_FEBRERO':'Febrero','3_MARZO':'Marzo','4_ABRIL':'Abril','5_MAYO':'Mayo','6_JUNIO':'Junio','7_JULIO':'Julio','8_AGOSTO':'Agosto','9_SEPTIEMBRE':'Septiembre','10_OCTUBRE':'Octubre','11_NOVIEMBRE':'Noviembre','12_DICIEMBRE':'Diciembre'};
+const MESES=['1_ENERO','2_FEBRERO','3_MARZO','4_ABRIL','5_MAYO','6_JUNIO','7_JULIO','8_AGOSTO','9_SEPTIEMBRE','10_OCTUBRE','11_NOVIEMBRE','12_DICIEMBRE'];
+const CL=['rgba(74,158,255,.75)','rgba(0,229,160,.75)','rgba(255,71,87,.75)','rgba(255,193,7,.75)','rgba(167,139,250,.75)','rgba(244,114,182,.75)','rgba(103,232,249,.75)','rgba(134,239,172,.75)'];
+
+// ═══ PROYECCIÓN MAYO–DICIEMBRE (clonar plantilla de Abril) ═══
+const MESES_PROYECTAR=['5_MAYO','6_JUNIO','7_JULIO','8_AGOSTO','9_SEPTIEMBRE','10_OCTUBRE','11_NOVIEMBRE','12_DICIEMBRE'];
+const PLANTILLA='4_ABRIL';
+
+function clonarMes(arr, plantilla, nuevoMes){
+  return arr
+    .filter(r=>r.mes===plantilla)
+    .map(r=>{
+      const clon={...r, mes:nuevoMes, est:'Pendiente', _proyectado:true};
+      // Limpiar fechas pagadas — quedan vacías para que el usuario las llene
+      if('fecha' in clon) clon.fecha='';
+      if('fp' in clon) clon.fp='';
+      delete clon._mesOriginal;
+      delete clon._fechaAntes;
+      return clon;
+    });
+}
+
+MESES_PROYECTAR.forEach(mes=>{
+  clonarMes(ING, PLANTILLA, mes).forEach(r=>ING.push(r));
+  clonarMes(GAS, PLANTILLA, mes).forEach(r=>GAS.push(r));
+  clonarMes(OBL, PLANTILLA, mes).forEach(r=>OBL.push(r));
+});
+let CH={};
+let fDash='Todos', fGM='Todos', fGE='Todos', fOM='Todos', fOE='Todos';
+
+const fmt=n=>'$'+Math.round(n||0).toLocaleString('es-CO');
+const ml=m=>ML[m]||m;
+function tc(t){const s=(t||'').toLowerCase();
+  if(s.includes('credito'))return 'p';if(s.includes('ahorro'))return 'b';
+  if(s.includes('alquiler'))return 'a';if(s.includes('educacion'))return 'pk';
+  if(s.includes('seguridad'))return 'g';if(s.includes('telefonia'))return 'a';
+  if(s.includes('mascotas'))return 'pk';if(s.includes('mercado'))return 'g';
+  if(s.includes('transporte'))return 'b';if(s.includes('gym'))return 'p';
+  if(s.includes('administracion'))return 'a';if(s.includes('parqueo')||s.includes('parqueadero'))return 'r';
+  if(s.includes('servicio'))return 'b';return 'r';
+}
+// ═══ FECHAS Y ROLLOVER ═══
+const ORDEN_MES={'1_ENERO':1,'2_FEBRERO':2,'3_MARZO':3,'4_ABRIL':4,'5_MAYO':5,'6_JUNIO':6,'7_JULIO':7,'8_AGOSTO':8,'9_SEPTIEMBRE':9,'10_OCTUBRE':10,'11_NOVIEMBRE':11,'12_DICIEMBRE':12};
+const MES_SIGUIENTE={'1_ENERO':'2_FEBRERO','2_FEBRERO':'3_MARZO','3_MARZO':'4_ABRIL','4_ABRIL':'5_MAYO','5_MAYO':'6_JUNIO','6_JUNIO':'7_JULIO','7_JULIO':'8_AGOSTO','8_AGOSTO':'9_SEPTIEMBRE','9_SEPTIEMBRE':'10_OCTUBRE','10_OCTUBRE':'11_NOVIEMBRE','11_NOVIEMBRE':'12_DICIEMBRE'};
+
+function getMesActual(){
+  const m=new Date().getMonth()+1;
+  const meses=['','1_ENERO','2_FEBRERO','3_MARZO','4_ABRIL','5_MAYO','6_JUNIO','7_JULIO','8_AGOSTO','9_SEPTIEMBRE','10_OCTUBRE','11_NOVIEMBRE','12_DICIEMBRE'];
+  return meses[m];
+}
+
+function applyRollover(arr){
+  const mesActual=getMesActual();
+  const orMesActual=ORDEN_MES[mesActual]||99;
+  arr.forEach(r=>{
+    if(r.est==='Pendiente'){
+      let orMes=ORDEN_MES[r.mes]||99;
+      while(orMes<orMesActual && MES_SIGUIENTE[r.mes]){
+        if(!r._mesOriginal) r._mesOriginal=r.mes;
+        r.mes=MES_SIGUIENTE[r.mes];
+        orMes=ORDEN_MES[r.mes]||99;
+      }
+    }
+  });
+}
+
+function badge(est,type,idx,mesOriginal){
+  const moved=mesOriginal?`<span class="moved-badge">↗ de ${ml(mesOriginal)}</span>`:'';
+  if(est==='Pagado')
+    return `<span class="spag" onclick="toggleEstado('${type}',${idx})" title="Click para cambiar a Pendiente">Pagado</span>${moved}`;
+  return `<span class="spend" onclick="toggleEstado('${type}',${idx})" title="Click para cambiar a Pagado">Pendiente</span>${moved}`;
+}
+
+function toggleEstado(type,idx){
+  const arr=type==='gas'?GAS:OBL;
+  const reg=arr[idx];
+  if(!reg)return;
+  const ahora=new Date();
+  const hoy=`${String(ahora.getDate()).padStart(2,'0')}/${String(ahora.getMonth()+1).padStart(2,'0')}/${ahora.getFullYear()}`;
+  if(reg.est==='Pendiente'){
+    // Marcar como Pagado → guardar fecha anterior y poner fecha de hoy
+    reg._fechaAntes = type==='gas' ? reg.fecha : reg.fp;
+    reg.est='Pagado';
+    if(type==='gas') reg.fecha=hoy; else reg.fp=hoy;
+    if(reg._mesOriginal){reg.mes=reg._mesOriginal;delete reg._mesOriginal;}
+  } else {
+    // Revertir a Pendiente → restaurar fecha anterior
+    reg.est='Pendiente';
+    if(type==='gas') reg.fecha=reg._fechaAntes||''; else reg.fp=reg._fechaAntes||'';
+    delete reg._fechaAntes;
+    applyRollover([reg]);
+  }
+  calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
+  if(type==='gas')buildGastos();else buildObligaciones();
+  showToast(`"${reg.desc}" → ${reg.est}${reg.est==='Pagado'?' ('+hoy+')':''}`);
+  guardarEstadoEnSheets(type, idx);
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1a2840;border:1px solid var(--green);color:var(--green);padding:10px 18px;border-radius:10px;font-size:12px;font-family:"DM Mono",monospace;z-index:9999;transition:opacity .4s';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+function calcLibro(){
+  const tI=ING.reduce((a,b)=>a+b.monto,0);
+  const tG=GAS.reduce((a,b)=>a+b.monto,0);
+  const tO=OBL.reduce((a,b)=>a+b.monto,0);
+  const tp=OBL.filter(o=>o.est==='Pendiente').reduce((a,b)=>a+b.monto,0)
+           +GAS.filter(g=>g.est==='Pendiente').reduce((a,b)=>a+b.monto,0);
+  const bal=tI-tG-tO;
+  document.getElementById('lib-ing').textContent=fmt(tI);
+  document.getElementById('lib-gas').textContent=fmt(tG);
+  document.getElementById('lib-obl').textContent=fmt(tO);
+  document.getElementById('lib-pend').textContent=fmt(tp);
+  document.getElementById('lib-bal').textContent=fmt(bal);
+  document.getElementById('lib-bal').className='lb-v '+(bal>=0?'p':'r');
+}
+
+function updateKPIs(){
+  const fi=fDash==='Todos'?ING:ING.filter(d=>d.mes===fDash);
+  const fg=fDash==='Todos'?GAS:GAS.filter(d=>d.mes===fDash);
+  const fo=fDash==='Todos'?OBL:OBL.filter(d=>d.mes===fDash);
+  const i=fi.reduce((a,b)=>a+b.monto,0);
+  const g=fg.reduce((a,b)=>a+b.monto,0);
+  const o=fo.reduce((a,b)=>a+b.monto,0);
+  const p=fo.filter(x=>x.est==='Pendiente').reduce((a,b)=>a+b.monto,0)
+          +fg.filter(x=>x.est==='Pendiente').reduce((a,b)=>a+b.monto,0);
+  const b=i-g-o;
+  document.getElementById('k-ing').textContent=fmt(i);
+  document.getElementById('k-gas').textContent=fmt(g);
+  document.getElementById('k-obl').textContent=fmt(o);
+  document.getElementById('k-pend').textContent=fmt(p);
+  document.getElementById('k-bal').textContent=fmt(b);
+  const lbl=fDash==='Todos'?'Ene–Dic 2026':ml(fDash);
+  ['k-ing-s','k-gas-s','k-obl-s','k-pend-s'].forEach(id=>document.getElementById(id).textContent=lbl);
+  document.getElementById('k-bal').className='kpi-val '+(b>=0?'p':'r');
+  document.getElementById('k-bal-s').textContent=b>=0?'✅ Superávit':'⚠️ Déficit';
+}
+
+const CD={
+  plugins:{legend:{labels:{color:'#4a6080',font:{family:'DM Mono',size:10}}}},
+  scales:{x:{ticks:{color:'#4a6080',font:{family:'DM Mono',size:10}},grid:{color:'#1a2840'}},
+          y:{ticks:{color:'#4a6080',font:{family:'DM Mono',size:10},callback:v=>'$'+(v/1e6).toFixed(1)+'M'},grid:{color:'#1a2840'}}}
+};
+
+// ═══ CHART VIEWS ═══
+const chartViews={comparativo:'anual',donut:'anual',flujo:'anual'};
+
+function setChartView(chart,view,btn){
+  chartViews[chart]=view;
+  const grp=btn.closest('.chart-toggle');
+  grp.querySelectorAll('.ctbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildCharts();
+}
+
+function getChartData(mes){
+  // Si mes='Todos' → agrupado anual por mes; si mes específico → por tipo/categoría dentro del mes
+  if(mes==='Todos'){
+    return MESES.map(m=>({
+      m:ml(m).substring(0,3),
+      i:ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0),
+      g:GAS.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0),
+      o:OBL.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0),
+    }));
+  } else {
+    // Vista por mes: desglose por categoría dentro del mes seleccionado
+    const cats=[...new Set([...GAS.filter(d=>d.mes===mes).map(d=>d.tipo),...OBL.filter(d=>d.mes===mes).map(d=>d.tipo)])].filter(Boolean);
+    return cats.map(c=>({
+      m:c,
+      i:ING.filter(d=>d.mes===mes).reduce((a,b)=>a+b.monto,0),
+      g:GAS.filter(d=>d.mes===mes&&d.tipo===c).reduce((a,b)=>a+b.monto,0),
+      o:OBL.filter(d=>d.mes===mes&&d.tipo===c).reduce((a,b)=>a+b.monto,0),
+    }));
+  }
+}
+
+function buildCharts(){
+  const mesSel = fDash==='Todos' ? 'Todos' : fDash;
+
+  // ── Comparativo ──
+  const viewComp=chartViews.comparativo;
+  const resComp = viewComp==='anual'
+    ? MESES.map(m=>({m:ml(m).substring(0,3),i:ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0),g:GAS.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0),o:OBL.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0)}))
+    : (()=>{
+        const m = mesSel==='Todos'?'4_ABRIL':mesSel;
+        const cats=[...new Set([...GAS.filter(d=>d.mes===m).map(d=>d.tipo),...OBL.filter(d=>d.mes===m).map(d=>d.tipo)])].filter(Boolean);
+        const ingM=ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0);
+        return cats.map(c=>({m:c,i:ingM/cats.length,g:GAS.filter(d=>d.mes===m&&d.tipo===c).reduce((a,b)=>a+b.monto,0),o:OBL.filter(d=>d.mes===m&&d.tipo===c).reduce((a,b)=>a+b.monto,0)}));
+      })();
+  rb('cComparativo','bar',{labels:resComp.map(r=>r.m),datasets:[
+    {label:'Ingresos',data:resComp.map(r=>r.i),backgroundColor:'rgba(0,229,160,.7)',borderRadius:4},
+    {label:'Gastos',data:resComp.map(r=>r.g),backgroundColor:'rgba(255,71,87,.7)',borderRadius:4},
+    {label:'Obligaciones',data:resComp.map(r=>r.o),backgroundColor:'rgba(74,158,255,.7)',borderRadius:4},
+  ]},{responsive:true,maintainAspectRatio:false,...CD});
+
+  // ── Donut ──
+  const viewDonut=chartViews.donut;
+  const srcI = viewDonut==='anual'||mesSel==='Todos' ? ING : ING.filter(d=>d.mes===mesSel);
+  const srcG = viewDonut==='anual'||mesSel==='Todos' ? GAS : GAS.filter(d=>d.mes===mesSel);
+  const srcO = viewDonut==='anual'||mesSel==='Todos' ? OBL : OBL.filter(d=>d.mes===mesSel);
+  const tI2=srcI.reduce((a,b)=>a+b.monto,0),tG2=srcG.reduce((a,b)=>a+b.monto,0),tO2=srcO.reduce((a,b)=>a+b.monto,0);
+  rb('cDonut','doughnut',{labels:['Gastos','Obligaciones','Balance'],
+    datasets:[{data:[tG2,tO2,Math.max(0,tI2-tG2-tO2)],backgroundColor:['rgba(255,71,87,.8)','rgba(74,158,255,.8)','rgba(0,229,160,.8)'],borderColor:'#0f1828',borderWidth:2}]
+  },{responsive:true,maintainAspectRatio:false,plugins:CD.plugins});
+
+  // ── Flujo ──
+  const viewFlujo=chartViews.flujo;
+  const resFlujo = viewFlujo==='anual'
+    ? MESES.map(m=>({m:ml(m).substring(0,3),v:ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0)-GAS.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0)-OBL.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0)}))
+    : (()=>{
+        const m=mesSel==='Todos'?'4_ABRIL':mesSel;
+        const cats=[...new Set([...GAS.filter(d=>d.mes===m).map(d=>d.tipo),...OBL.filter(d=>d.mes===m).map(d=>d.tipo)])].filter(Boolean);
+        const ingM=ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0);
+        return cats.map(c=>({m:c,v:ingM/cats.length - GAS.filter(d=>d.mes===m&&d.tipo===c).reduce((a,b)=>a+b.monto,0) - OBL.filter(d=>d.mes===m&&d.tipo===c).reduce((a,b)=>a+b.monto,0)}));
+      })();
+  rb('cFlujo','line',{labels:resFlujo.map(r=>r.m),datasets:[{
+    label:'Balance neto',data:resFlujo.map(r=>r.v),borderColor:'#00e5a0',
+    backgroundColor:'rgba(0,229,160,.06)',
+    pointBackgroundColor:resFlujo.map(r=>r.v>=0?'#00e5a0':'#ff4757'),
+    pointRadius:5,tension:.4,fill:true
+  }]},{responsive:true,maintainAspectRatio:false,...CD});
+
+  // ── Gastos por Tipo (siempre según filtro activo) ──
+  const gSrc = mesSel==='Todos'?GAS:GAS.filter(d=>d.mes===mesSel);
+  const gT={};gSrc.forEach(g=>{const t=g.tipo||'Otros';gT[t]=(gT[t]||0)+g.monto;});
+  const gK=Object.keys(gT).sort((a,b)=>gT[b]-gT[a]).slice(0,8);
+  rb('cGastoTipo','bar',{labels:gK,datasets:[{label:'Monto',data:gK.map(k=>gT[k]),backgroundColor:CL,borderRadius:4}]},
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',...CD,plugins:{...CD.plugins,legend:{display:false}}});
+
+  // ── Obligaciones por Tipo ──
+  const oSrc = mesSel==='Todos'?OBL:OBL.filter(d=>d.mes===mesSel);
+  const oT={};oSrc.forEach(o=>{const t=o.tipo||'Otros';oT[t]=(oT[t]||0)+o.monto;});
+  const oK=Object.keys(oT).sort((a,b)=>oT[b]-oT[a]).slice(0,8);
+  rb('cOblTipo','bar',{labels:oK,datasets:[{label:'Monto',data:oK.map(k=>oT[k]),backgroundColor:CL,borderRadius:4}]},
+    {responsive:true,maintainAspectRatio:false,indexAxis:'y',...CD,plugins:{...CD.plugins,legend:{display:false}}});
+}
+
+function rb(id,type,data,opts){if(CH[id])CH[id].destroy();CH[id]=new Chart(document.getElementById(id),{type,data,options:opts});}
+
+// ═══ EDITABLE CELLS ═══
+function makeEditable(el, arr, idx, field, isNum){
+  const cur = arr[idx][field] || '';
+  const input = document.createElement('input');
+  input.className='edit-input';
+  input.value = isNum ? (cur||0) : cur;
+  input.type = isNum ? 'number' : 'text';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+  function save(){
+    const val = isNum ? (parseFloat(input.value)||0) : input.value.trim();
+    arr[idx][field] = val;
+    calcLibro(); updateKPIs(); buildCharts(); buildResumen(); buildEntidades();
+    if(arr===GAS) buildGastos();
+    else if(arr===OBL) buildObligaciones();
+    else if(arr===ING) buildIngresos();
+    showToast(`"${arr[idx].desc}" actualizado`);
+    guardarCeldaEnSheets(arr, idx, field);
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape'){ arr[idx][field]=cur; if(arr===GAS) buildGastos(); else buildObligaciones(); }});
+}
+
+// ═══ BALANCE POR ENTIDAD ═══
+const ENT_COLORS = ['#00e5a0','#4a9eff','#a78bfa','#ffc107','#f472b6','#67e8f9','#86efac','#fb923c'];
+
+function buildEntidades(){
+  const mesSel = fDash==='Todos' ? null : fDash;
+
+  // Fuente filtrada por mes si aplica
+  const srcIng = mesSel ? ING.filter(d=>d.mes===mesSel) : ING;
+  const srcGas = mesSel ? GAS.filter(d=>d.mes===mesSel) : GAS;
+  const srcObl = mesSel ? OBL.filter(d=>d.mes===mesSel) : OBL;
+
+  // Entidades únicas desde ingresos
+  const entidades = [...new Set(srcIng.map(r=>r.entidad).filter(Boolean))];
+
+  if(entidades.length===0){ document.getElementById('entidad-box').innerHTML=''; return; }
+
+  // Para cada entidad: ingresos propios + gastos/obligaciones donde origen === entidad
+  const data = entidades.map((ent,i)=>{
+    const ing   = srcIng.filter(r=>r.entidad===ent).reduce((a,b)=>a+b.monto,0);
+    const gas   = srcGas.filter(r=>r.origen===ent).reduce((a,b)=>a+b.monto,0);
+    const obl   = srcObl.filter(r=>r.origen===ent).reduce((a,b)=>a+b.monto,0);
+    const pend  = srcGas.filter(r=>r.origen===ent&&r.est==='Pendiente').reduce((a,b)=>a+b.monto,0)
+                + srcObl.filter(r=>r.origen===ent&&r.est==='Pendiente').reduce((a,b)=>a+b.monto,0);
+    const queda = ing - gas - obl;
+    const pct   = ing>0 ? Math.max(0,Math.min(100, (queda/ing)*100)) : 0;
+    const color = ENT_COLORS[i % ENT_COLORS.length];
+    return {ent, ing, gas, obl, pend, queda, pct, color};
+  }).sort((a,b)=>b.ing-a.ing);
+
+  const label = mesSel ? ml(mesSel) : 'Ene–Dic 2026';
+
+  document.getElementById('entidad-box').innerHTML = `
+    <div class="ent-section-title">💳 Balance por Entidad · ${label}</div>
+    <div class="ent-grid">
+      ${data.map(d=>`
+        <div class="ent-card" style="--accent-c:${d.color}">
+          <div class="ent-name">${d.ent}</div>
+          <div class="ent-row">
+            <span class="ent-lbl">Ingresos</span>
+            <span class="ent-val" style="color:var(--green)">${fmt(d.ing)}</span>
+          </div>
+          <div class="ent-row">
+            <span class="ent-lbl">Gastos</span>
+            <span class="ent-val" style="color:var(--red)">${fmt(d.gas)}</span>
+          </div>
+          <div class="ent-row">
+            <span class="ent-lbl">Obligaciones</span>
+            <span class="ent-val" style="color:var(--blue)">${fmt(d.obl)}</span>
+          </div>
+          ${d.pend>0?`<div class="ent-row">
+            <span class="ent-lbl">⏳ Pendiente</span>
+            <span class="ent-val" style="color:var(--amber)">${fmt(d.pend)}</span>
+          </div>`:''}
+          <div class="ent-bar-wrap"><div class="ent-bar" style="width:${d.pct}%;background:${d.color}"></div></div>
+          <div class="ent-queda-big" style="color:${d.queda>=0?d.color:'var(--red)'}">
+            ${d.queda>=0?'':'−'}${fmt(Math.abs(d.queda))}
+          </div>
+          <div class="ent-lbl" style="margin-top:2px">Queda disponible</div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function buildResumen(){
+  document.getElementById('t-resumen').innerHTML=MESES.map(m=>{
+    const i=ING.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0);
+    const g=GAS.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0);
+    const o=OBL.filter(d=>d.mes===m).reduce((a,b)=>a+b.monto,0);
+    const pag=OBL.filter(d=>d.mes===m&&d.est==='Pagado').reduce((a,b)=>a+b.monto,0)
+              +GAS.filter(d=>d.mes===m&&d.est==='Pagado').reduce((a,b)=>a+b.monto,0);
+    const pend=OBL.filter(d=>d.mes===m&&d.est==='Pendiente').reduce((a,b)=>a+b.monto,0)
+               +GAS.filter(d=>d.mes===m&&d.est==='Pendiente').reduce((a,b)=>a+b.monto,0);
+    const b=i-g-o;
+    return `<tr><td><strong style="font-family:'Syne',sans-serif">${ml(m)}</strong></td>
+      <td style="color:var(--green)">${fmt(i)}</td><td style="color:var(--red)">${fmt(g)}</td>
+      <td style="color:var(--blue)">${fmt(o)}</td><td style="color:var(--green)">${fmt(pag)}</td>
+      <td style="color:var(--amber)">${fmt(pend)}</td>
+      <td class="${b>=0?'pos':'neg'}">${fmt(b)}</td>
+      <td><span class="tag ${b>=0?'g':'r'}">${b>=0?'✅ Superávit':'⚠️ Déficit'}</span></td></tr>`;
+  }).join('');
+}
+
+// Descripción de ingresos conocidas para el dropdown
+const DESC_ING=['Nomina Oscar','Nomina Mariana','Subsidio','PSvita','Credito 4464','TC K-tronix','Bono','Prima','Vacaciones','Otros'];
+const ENTIDADES_ING=['SNR','TSG','SDA','Colsubsidio','K-tronix','La cumana','Banco de Bogota','Banco Bogotá','Otro'];
+const BANCOS=['Bogotá','Davivienda','Nequi','Daviplata','Bancolombia','Otro'];
+
+let fIM='Todos'; // filtro mes ingresos
+
+function setIngFilter(type,val,btn){
+  const grp=btn.closest('.filter-bar');
+  grp.querySelectorAll('.month-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  fIM=val;
+  buildIngresos();
+}
+
+function buildIngresos(){
+  const q=(document.getElementById('ing-search')?.value||'').toLowerCase();
+  let d=ING.map((x,i)=>({...x,_idx:i}));
+  if(fIM!=='Todos') d=d.filter(x=>x.mes===fIM);
+  if(q) d=d.filter(x=>(x.desc+x.entidad+x.banco+x.id).toLowerCase().includes(q));
+  document.getElementById('t-ingresos').innerHTML=d.map(x=>`<tr>
+    <td><span class="tag b">${x.id}</span></td>
+    <td>${ml(x.mes)}</td>
+    <td><span class="editable" onclick="makeEditableFecha(this,ING,${x._idx},'fecha')" title="Click para editar fecha">${x.fecha||'—'}</span></td>
+    <td><span class="editable" onclick="makeEditableSelect(this,ING,${x._idx},'desc',DESC_ING)" title="Click para editar">${x.desc}</span></td>
+    <td><span class="editable" onclick="makeEditableSelect(this,ING,${x._idx},'banco',BANCOS)" title="Click para editar">${x.banco||'—'}</span></td>
+    <td><span class="editable" onclick="makeEditableSelect(this,ING,${x._idx},'entidad',ENTIDADES_ING)" title="Click para editar">${x.entidad}</span></td>
+    <td><span class="editable" onclick="makeEditable(this,ING,${x._idx},'monto',true)" title="Click para editar" style="color:var(--green);font-weight:600">${fmt(x.monto)}</span></td>
+    <td><button class="btn-del" onclick="eliminarFila('ing',${x._idx})" title="Eliminar">🗑</button></td>
+  </tr>`).join('');
+  document.getElementById('cnt-ing').textContent=d.length+' registros · Total: '+fmt(d.reduce((a,b)=>a+b.monto,0));
+}
+
+function makeEditableSelect(el, arr, idx, field, opciones){
+  const cur = arr[idx][field]||'';
+  const sel = document.createElement('select');
+  sel.className='edit-input';
+  // Opción libre + lista
+  const allOpts=[cur,...opciones.filter(o=>o!==cur),'— Escribir otro —'];
+  allOpts.forEach(o=>{
+    const opt=document.createElement('option');
+    opt.value=o; opt.textContent=o;
+    if(o===cur) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  el.replaceWith(sel);
+  sel.focus();
+  function save(){
+    let val=sel.value;
+    if(val==='— Escribir otro —'){
+      val=prompt('Escribe el valor:')||cur;
+    }
+    arr[idx][field]=val;
+    calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
+    buildIngresos();
+    showToast(`"${arr[idx].desc}" → ${field}: ${val}`);
+    guardarCeldaEnSheets(arr, idx, field);
+  }
+  sel.addEventListener('change', save);
+  sel.addEventListener('blur', ()=>{ if(document.activeElement!==sel) save(); });
+  sel.addEventListener('keydown', e=>{ if(e.key==='Escape'){ arr[idx][field]=cur; buildIngresos(); }});
+}
+
+// ── Fecha editable con date picker ──
+function makeEditableFecha(el, arr, idx, field){
+  const cur = arr[idx][field]||'';
+  // Convertir dd/mm/yyyy → yyyy-mm-dd para el input date
+  let isoVal='';
+  if(cur && cur.includes('/')){
+    const p=cur.split('/');
+    if(p.length===3) isoVal=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+  }
+  const input=document.createElement('input');
+  input.type='date'; input.className='edit-input'; input.value=isoVal;
+  el.replaceWith(input); input.focus();
+  function save(){
+    let val='';
+    if(input.value){
+      const p=input.value.split('-');
+      val=`${p[2]}/${p[1]}/${p[0]}`; // → dd/mm/yyyy
+    }
+    arr[idx][field]=val||cur;
+    calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
+    if(arr===GAS) buildGastos();
+    else if(arr===OBL) buildObligaciones();
+    else buildIngresos();
+    if(val) guardarCeldaEnSheets(arr, idx, field);
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape'){ arr[idx][field]=cur; if(arr===GAS)buildGastos(); else if(arr===OBL)buildObligaciones(); else buildIngresos(); }});
+}
+
+// ── Eliminar fila ──
+async function eliminarFila(type, idx){
+  const arr  = type==='ing'?ING : type==='gas'?GAS:OBL;
+  const reg  = arr[idx];
+  if(!reg) return;
+  if(!confirm(`¿Eliminar "${reg.desc}" (${fmt(reg.monto)})?`)) return;
+
+  // Eliminar en Sheets si hay sesión activa
+  if(gAccessToken){
+    const sheetName = type==='ing'?SHEET_NAMES.ingresos : type==='gas'?SHEET_NAMES.gastos:SHEET_NAMES.obligaciones;
+    try {
+      showSaveIndicator('🗑 Eliminando en Sheets...');
+      const {headers, rows} = await getSheetRows(sheetName);
+      const mesLabel = ML[reg.mes]||reg.mes;
+      const fila = rows.find(r=>{
+        const desc = r['Descripción']||r['Descripcion']||Object.values(r)[3]||'';
+        const mes  = r['MES']||r['Mes']||'';
+        return desc.toLowerCase()===reg.desc.toLowerCase() && mes.toLowerCase()===mesLabel.toLowerCase();
+      });
+      if(fila){
+        // Obtener sheetId numérico de la hoja
+        const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}?fields=sheets.properties`,
+          {headers:{'Authorization':'Bearer '+gAccessToken}});
+        const meta = await metaRes.json();
+        const sheet = meta.sheets.find(s=>s.properties.title===sheetName);
+        if(sheet){
+          const sheetIdNum = sheet.properties.sheetId;
+          await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}:batchUpdate`,{
+            method:'POST',
+            headers:{'Authorization':'Bearer '+gAccessToken,'Content-Type':'application/json'},
+            body: JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sheetIdNum,dimension:'ROWS',startIndex:fila._rowNum-1,endIndex:fila._rowNum}}}]})
+          });
+          showSaveIndicator('✅ Eliminado en Sheets');
+        }
+      }
+    } catch(e){ console.error(e); showToast('⚠️ Error al eliminar en Sheets: '+e.message); }
+  }
+
+  arr.splice(idx,1);
+  calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
+  if(type==='ing') buildIngresos();
+  else if(type==='gas') buildGastos();
+  else buildObligaciones();
+  showToast(`"${reg.desc}" eliminado`);
+}
+
+function buildGastos(){
+  const q=(document.getElementById('gas-search')?.value||'').toLowerCase();
+  let d=GAS.map((x,i)=>({...x,_idx:i}));
+  if(fGM!=='Todos')d=d.filter(x=>x.mes===fGM);
+  if(fGE!=='Todos')d=d.filter(x=>x.est===fGE);
+  if(q) d=d.filter(x=>(x.desc+x.origen+x.tipo).toLowerCase().includes(q));
+  const proyBadge=x=>x._proyectado?'<span class="proy-badge">proyectado</span>':'';
+  document.getElementById('t-gastos').innerHTML=d.map(x=>`<tr>
+    <td>${ml(x.mes)}</td>
+    <td><span class="editable" onclick="makeEditableFecha(this,GAS,${x._idx},'fecha')" title="Click para editar fecha">${x.fecha||'—'}</span></td>
+    <td>${x.desc}${proyBadge(x)}</td>
+    <td><span class="tag ${tc(x.tipo)}">${x.tipo||'—'}</span></td>
+    <td><span class="editable" onclick="makeEditable(this,GAS,${x._idx},'origen',false)" title="Click para editar">${x.origen}</span></td>
+    <td><span class="editable" onclick="makeEditable(this,GAS,${x._idx},'monto',true)" title="Click para editar" style="color:var(--red);font-weight:600">${fmt(x.monto)}</span></td>
+    <td>${badge(x.est,'gas',x._idx,x._mesOriginal)}</td>
+    <td><button class="btn-del" onclick="eliminarFila('gas',${x._idx})" title="Eliminar">🗑</button></td>
+  </tr>`).join('');
+  document.getElementById('cnt-gas').textContent=d.length+' registros · '+fmt(d.reduce((a,b)=>a+b.monto,0));
+}
+
+function buildObligaciones(){
+  const q=(document.getElementById('obl-search')?.value||'').toLowerCase();
+  let d=OBL.map((x,i)=>({...x,_idx:i}));
+  if(fOM!=='Todos')d=d.filter(x=>x.mes===fOM);
+  if(fOE!=='Todos')d=d.filter(x=>x.est===fOE);
+  if(q) d=d.filter(x=>(x.desc+x.tipo+x.origen).toLowerCase().includes(q));
+  const proyBadge=x=>x._proyectado?'<span class="proy-badge">proyectado</span>':'';
+  document.getElementById('t-obligaciones').innerHTML=d.map(x=>`<tr>
+    <td><span class="tag ${tc(x.tipo)}" style="font-size:9px">${x.id||'—'}</span></td>
+    <td>${ml(x.mes)}</td>
+    <td><span class="editable" onclick="makeEditableFecha(this,OBL,${x._idx},'fp')" title="Click para editar fecha">${x.fp||'—'}</span></td>
+    <td><strong>${x.desc}</strong>${proyBadge(x)}</td>
+    <td><span class="tag ${tc(x.tipo)}">${x.tipo}</span></td>
+    <td><span class="editable" onclick="makeEditable(this,OBL,${x._idx},'origen',false)" title="Click para editar">${x.origen}</span></td>
+    <td><span class="editable" onclick="makeEditable(this,OBL,${x._idx},'monto',true)" title="Click para editar" style="color:var(--blue);font-weight:600">${fmt(x.monto)}</span></td>
+    <td>${badge(x.est,'obl',x._idx,x._mesOriginal)}</td>
+    <td><span class="editable" onclick="makeEditableFecha(this,OBL,${x._idx},'fo')" title="Click para editar">${x.fo||'—'}</span></td>
+    <td><button class="btn-del" onclick="eliminarFila('obl',${x._idx})" title="Eliminar">🗑</button></td>
+  </tr>`).join('');
+  document.getElementById('cnt-obl').textContent=d.length+' registros · '+fmt(d.reduce((a,b)=>a+b.monto,0));
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if(tab==='ingresos')buildIngresos();
+  if(tab==='gastos')buildGastos();
+  if(tab==='obligaciones')buildObligaciones();
+}
+
+function filterDash(mes,btn){
+  fDash=mes;
+  document.querySelectorAll('#tab-dashboard .month-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateKPIs();
+  buildCharts();
+  buildResumen();
+  buildEntidades();
+}
+
+function setGasFilter(type,val,btn){
+  const grp=btn.closest('.filter-bar');
+  const opts=type==='mes'?['Todos','1_ENERO','2_FEBRERO','3_MARZO','4_ABRIL']:['Todos','Pagado','Pendiente'];
+  grp.querySelectorAll('.month-btn').forEach(b=>{
+    const v=b.getAttribute('onclick')?.match(/'([^']+)'/g)?.[1]?.replace(/'/g,'');
+    if(opts.includes(v))b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  if(type==='mes')fGM=val; else fGE=val;
+  buildGastos();
+}
+
+function setOblFilter(type,val,btn){
+  const grp=btn.closest('.filter-bar');
+  const opts=type==='mes'?['Todos','1_ENERO','2_FEBRERO','3_MARZO','4_ABRIL']:['Todos','Pagado','Pendiente'];
+  grp.querySelectorAll('.month-btn').forEach(b=>{
+    const v=b.getAttribute('onclick')?.match(/'([^']+)'/g)?.[1]?.replace(/'/g,'');
+    if(opts.includes(v))b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  if(type==='mes')fOM=val; else fOE=val;
+  buildObligaciones();
+}
+
+function toggleForm(){
+  const t=document.getElementById('f-tipo').value;
+  document.getElementById('fg-ent').style.display=t==='ingreso'?'':'none';
+  document.getElementById('fg-cat').style.display=t==='ingreso'?'none':'';
+  document.getElementById('fg-est').style.display=t==='ingreso'?'none':'';
+}
+
+function agregarRegistro(){
+  const tipo=document.getElementById('f-tipo').value;
+  const mes=document.getElementById('f-mes').value;
+  const fecha=document.getElementById('f-fecha').value;
+  const desc=document.getElementById('f-desc').value.trim();
+  const origen=document.getElementById('f-origen').value.trim();
+  const entidad=document.getElementById('f-entidad').value.trim();
+  const cat=document.getElementById('f-cat').value;
+  const monto=parseFloat(document.getElementById('f-monto').value)||0;
+  const est=document.getElementById('f-estado').value;
+  const al=document.getElementById('f-alert');
+  if(!desc||!origen||monto<=0){al.className='alert err';al.textContent='⚠️ Completa Descripción, Origen y Monto > 0';return;}
+  const fp=fecha?fecha.split('-').reverse().join('/'):'';
+  if(tipo==='ingreso') ING.push({id:'NEW',mes,fecha:fp,desc,banco:origen,entidad,monto});
+  else if(tipo==='gasto') GAS.push({mes,fecha:fp,desc,origen,tipo:cat,monto,est});
+  else OBL.push({id:'NEW',mes,fp,desc,tipo:cat,origen,monto,est,fo:''});
+  // Guardar en Sheets si hay sesión activa
+  const regNuevo = tipo==='ingreso' ? ING[ING.length-1] : tipo==='gasto' ? GAS[GAS.length-1] : OBL[OBL.length-1];
+  guardarNuevoRegistroEnSheets(tipo, regNuevo);
+  calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();
+  const tc2={'ingreso':'g','gasto':'r','obligacion':'b'}[tipo];
+  document.getElementById('t-nuevos').innerHTML+=`<tr>
+    <td><span class="tag ${tc2}">${tipo}</span></td><td>${ml(mes)}</td><td>${fp||'—'}</td>
+    <td>${desc}</td><td>${cat}</td><td>${origen}</td>
+    <td style="font-weight:600">${fmt(monto)}</td><td>${badge(est)}</td></tr>`;
+  al.className='alert ok';al.textContent=`✅ "${desc}" ${fmt(monto)} guardado. Dashboard actualizado.`;
+  ['f-desc','f-origen','f-monto','f-fecha'].forEach(id=>document.getElementById(id).value='');
+  setTimeout(()=>al.className='alert',4000);
+}
+
+// ═══ SINCRONIZACIÓN CON GOOGLE SHEETS ═══
+// Pega aquí tus URLs CSV publicadas desde Archivo > Publicar en la web > CSV
+const CSV_URLS = {
+  ingresos:     'https://docs.google.com/spreadsheets/d/e/2PACX-1vQteC-vXt07i-doVzYknIBl2kWPfOfH-MjfcxmK-PInvwJuRBu6nM2FRsovh3xp4Pg2bKvamzxjnvVx/pub?gid=0&single=true&output=csv',
+  gastos:       'https://docs.google.com/spreadsheets/d/e/2PACX-1vQteC-vXt07i-doVzYknIBl2kWPfOfH-MjfcxmK-PInvwJuRBu6nM2FRsovh3xp4Pg2bKvamzxjnvVx/pub?gid=1905200589&single=true&output=csv',
+  obligaciones: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQteC-vXt07i-doVzYknIBl2kWPfOfH-MjfcxmK-PInvwJuRBu6nM2FRsovh3xp4Pg2bKvamzxjnvVx/pub?gid=1054077370&single=true&output=csv',
+};
+
+const MES_MAP={
+  'enero':'1_ENERO','febrero':'2_FEBRERO','marzo':'3_MARZO','abril':'4_ABRIL',
+  'mayo':'5_MAYO','junio':'6_JUNIO','julio':'7_JULIO','agosto':'8_AGOSTO',
+  'septiembre':'9_SEPTIEMBRE','octubre':'10_OCTUBRE','noviembre':'11_NOVIEMBRE','diciembre':'12_DICIEMBRE',
+  '1_enero':'1_ENERO','2_febrero':'2_FEBRERO','3_marzo':'3_MARZO','4_abril':'4_ABRIL',
+  '5_mayo':'5_MAYO','6_junio':'6_JUNIO','7_julio':'7_JULIO','8_agosto':'8_AGOSTO',
+  '9_septiembre':'9_SEPTIEMBRE','10_octubre':'10_OCTUBRE','11_noviembre':'11_NOVIEMBRE','12_diciembre':'12_DICIEMBRE',
+};
+
+function normalizarMes(raw){
+  if(!raw) return null;
+  return MES_MAP[raw.trim().toLowerCase()] || null;
+}
+
+function parseCOP(str){
+  if(!str) return 0;
+  return parseInt(str.replace(/[\$\.\s,]/g,'').replace(/[^0-9-]/g,'')) || 0;
+}
+
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line=>{
+    // handle quoted commas
+    const cols = []; let cur='', inQ=false;
+    for(let c of line){ if(c==='"') inQ=!inQ; else if(c===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=c; }
+    cols.push(cur.trim());
+    const row={};
+    headers.forEach((h,i)=>row[h]=cols[i]||'');
+    return row;
+  }).filter(r=>Object.values(r).some(v=>v));
+}
+
+function csvToIngresos(rows){
+  return rows.map(r=>({
+    id: r['ID_Ingresos_Gastos']||'',
+    mes: normalizarMes(r['Mes'])||'1_ENERO',
+    fecha: r['Fecha']||'',
+    desc: r['Descripción']||r['Descripcion']||'',
+    banco: r['Banco']||'',
+    entidad: r['Entidad']||'',
+    monto: parseCOP(r['Monto']),
+  })).filter(r=>r.monto>0);
+}
+
+function csvToGastos(rows){
+  return rows.map(r=>({
+    mes: normalizarMes(r['Mes'])||'1_ENERO',
+    fecha: r['Fecha de Pago']||r['Fecha']||'',
+    desc: r['Descripción']||r['Descripcion']||'',
+    origen: r['Origen']||'',
+    tipo: r['Tipo']||'Otros',
+    monto: parseCOP(r['Monto']),
+    est: r['Estado']||'Pendiente',
+  })).filter(r=>r.monto>0);
+}
+
+function csvToObligaciones(rows){
+  return rows.map(r=>({
+    id: r['ID']||'',
+    mes: normalizarMes(r['MES'])||'1_ENERO',
+    fp: r['Fecha de Pago']||'',
+    desc: r['Descripción']||r['Descripcion']||'',
+    tipo: r['Tipo']||'Otros',
+    origen: r['Origen']||'',
+    monto: parseCOP(r['Monto']),
+    est: r['Estado']||'Pendiente',
+    fo: r['Fecha Obligación']||r['Fecha Obligacion']||'',
+  })).filter(r=>r.monto>0);
+}
+
+async function fetchCSV(url){
+  // Usar proxy CORS para evitar bloqueos
+  const proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
+  const res = await fetch(proxy);
+  if(!res.ok) throw new Error('Error al obtener ' + url);
+  return res.text();
+}
+
+async function sincronizarSheets(){
+  const btn = document.getElementById('btn-refresh');
+  const icon = document.getElementById('refresh-icon');
+  const info = document.getElementById('sync-info');
+  btn.classList.add('loading');
+  icon.innerHTML='<span class="spin">⟳</span>';
+  info.textContent = 'Sincronizando...';
+
+  try {
+    const [csvIng, csvGas, csvObl] = await Promise.all([
+      fetchCSV(CSV_URLS.ingresos),
+      fetchCSV(CSV_URLS.gastos),
+      fetchCSV(CSV_URLS.obligaciones),
+    ]);
+
+    const newIng = csvToIngresos(parseCSV(csvIng));
+    const newGas = csvToGastos(parseCSV(csvGas));
+    const newObl = csvToObligaciones(parseCSV(csvObl));
+
+    if(newIng.length===0 && newGas.length===0 && newObl.length===0)
+      throw new Error('Sin datos — revisa que las hojas estén publicadas correctamente');
+
+    // Reemplazar solo los datos reales (Enero–Abril), conservar proyectados
+    ING.length=0; newIng.forEach(r=>ING.push(r));
+    GAS.length=0; newGas.forEach(r=>GAS.push(r));
+    OBL.length=0; newObl.forEach(r=>OBL.push(r));
+
+    // Re-proyectar Mayo–Diciembre con la nueva plantilla de Abril
+    MESES_PROYECTAR.forEach(mes=>{
+      clonarMes(ING, '4_ABRIL', mes).forEach(r=>ING.push(r));
+      clonarMes(GAS, '4_ABRIL', mes).forEach(r=>GAS.push(r));
+      clonarMes(OBL, '4_ABRIL', mes).forEach(r=>OBL.push(r));
+    });
+
+    applyRollover(GAS); applyRollover(OBL);
+    calcLibro(); updateKPIs(); buildCharts(); buildResumen(); buildEntidades();
+
+    const ahora = new Date();
+    const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
+    info.textContent = `✅ Actualizado hoy ${hora} · ${newIng.length} ingresos · ${newGas.length} gastos · ${newObl.length} obligaciones`;
+    showToast(`✅ Sincronizado — ${newIng.length+newGas.length+newObl.length} registros cargados`);
+
+  } catch(err) {
+    console.error(err);
+    info.textContent = '⚠️ ' + (err.message || 'Error de conexión');
+    showToast('⚠️ No se pudo sincronizar: ' + err.message);
+  } finally {
+    btn.classList.remove('loading');
+    icon.textContent='🔄';
+  }
+}
+
+// ═══ GOOGLE OAUTH + SHEETS WRITE-BACK ═══
+const G_CLIENT_ID   = '646863731721-7g1j0jn1vlsqkmoja9a1445btvcdkdv6.apps.googleusercontent.com';
+const G_SHEET_ID    = '1uzLXTtM6E0mYMsPdz5BekKHDJLCH8I3Nxv2lwVzV-Tg';
+const G_SCOPES      = 'https://www.googleapis.com/auth/spreadsheets';
+
+// Nombre exacto de tus hojas en Google Sheets (sensible a mayúsculas)
+const SHEET_NAMES = {
+  ingresos:     'Ingresos',
+  gastos:       'Gastos',
+  obligaciones: 'Obligaciones',
+};
+
+let gAccessToken = null;
+let gTokenClient = null;
+
+function initGoogleAuth(){
+  if(!window.google) { setTimeout(initGoogleAuth, 500); return; }
+  gTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: G_CLIENT_ID,
+    scope: G_SCOPES,
+    callback: (resp) => {
+      if(resp.error){ console.error(resp); showToast('⚠️ Error de autenticación: '+resp.error); return; }
+      gAccessToken = resp.access_token;
+      updateAuthUI(true, resp.expires_in);
+      showToast('✅ Conectado a Google Sheets');
+    },
+  });
+}
+
+function handleAuthClick(){
+  if(gAccessToken){
+    // Desconectar
+    google.accounts.oauth2.revoke(gAccessToken, ()=>{});
+    gAccessToken = null;
+    updateAuthUI(false);
+    showToast('Sesión cerrada');
+  } else {
+    gTokenClient.requestAccessToken({prompt:'consent'});
+  }
+}
+
+function updateAuthUI(connected, expiresIn){
+  const btn   = document.getElementById('btn-glogin');
+  const label = document.getElementById('glogin-label');
+  const info  = document.getElementById('sync-info');
+  if(connected){
+    btn.classList.add('connected');
+    label.textContent = 'Google conectado ✓';
+    info.textContent  = '🟢 Cambios se guardan automáticamente en Sheets';
+    if(expiresIn) setTimeout(()=>{ gAccessToken=null; updateAuthUI(false); showToast('⏰ Sesión expirada — reconecta'); }, expiresIn*1000);
+  } else {
+    btn.classList.remove('connected');
+    label.textContent = 'Conectar Google';
+    info.textContent  = 'Sin conexión Google · datos locales';
+  }
+}
+
+function showSaveIndicator(msg){
+  const el = document.getElementById('save-indicator');
+  el.textContent = msg || '💾 Guardando en Sheets...';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ── Helpers para encontrar fila en Sheets ──
+async function sheetsRequest(method, range, body){
+  const base = `https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}`;
+  const url  = method==='GET'
+    ? `${base}/values/${encodeURIComponent(range)}`
+    : `${base}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const opts = {
+    method,
+    headers: { 'Authorization': 'Bearer '+gAccessToken, 'Content-Type': 'application/json' },
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if(!res.ok){ const e=await res.text(); throw new Error(e); }
+  return res.json();
+}
+
+// Obtiene todas las filas de una hoja y devuelve {headers, rows, rawRows}
+async function getSheetRows(sheetName){
+  const data = await sheetsRequest('GET', `${sheetName}!A:Z`);
+  const all  = data.values || [];
+  if(all.length < 2) return {headers:[], rows:[], rawRows:[]};
+  const headers = all[0].map(h=>h.trim());
+  const rows    = all.slice(1).map((r,i)=>{ const o={}; headers.forEach((h,j)=>o[h]=r[j]||''); o._rowNum=i+2; return o; });
+  return {headers, rows, rawRows:all};
+}
+
+// Escribe un valor en una celda específica
+async function writeCell(sheetName, rowNum, colLetter, value){
+  await sheetsRequest('PUT', `${sheetName}!${colLetter}${rowNum}`, { values: [[value]] });
+}
+
+// Encuentra la columna de un header
+function colIndex(headers, name){ return headers.findIndex(h=>h.toLowerCase().includes(name.toLowerCase())); }
+function colLetter(idx){ return String.fromCharCode(65+idx); }
+
+// ── Escritura por tipo de cambio ──
+
+async function guardarEstadoEnSheets(type, idx){
+  if(!gAccessToken) return;
+  const arr       = type==='gas' ? GAS : OBL;
+  const reg       = arr[idx];
+  const sheetName = type==='gas' ? SHEET_NAMES.gastos : SHEET_NAMES.obligaciones;
+  try {
+    showSaveIndicator('💾 Guardando estado...');
+    const {headers, rows} = await getSheetRows(sheetName);
+    const colEst  = colIndex(headers,'Estado');
+    const colFP   = colIndex(headers,'Fecha');
+    if(colEst<0) throw new Error('Columna Estado no encontrada');
+
+    // Buscar fila por descripción + mes
+    const mesLabel = ML[reg.mes]||reg.mes;
+    const fila = rows.find(r=>{
+      const desc = Object.values(r)[3]||''; // columna Descripción aprox
+      const mes  = r['MES']||r['Mes']||'';
+      return desc.toLowerCase()===reg.desc.toLowerCase() && mes.toLowerCase()===mesLabel.toLowerCase();
+    });
+    if(!fila){ showToast('⚠️ Fila no encontrada en Sheets'); return; }
+
+    await writeCell(sheetName, fila._rowNum, colLetter(colEst), reg.est);
+    if(colFP>=0 && reg.est==='Pagado'){
+      const fechaCol = type==='gas' ? colIndex(headers,'Fecha de Pago')||colFP : colIndex(headers,'Fecha de Pago')||colFP;
+      await writeCell(sheetName, fila._rowNum, colLetter(fechaCol), reg.fp||reg.fecha||'');
+    }
+    showSaveIndicator('✅ Estado guardado');
+  } catch(e){ console.error(e); showToast('⚠️ Error guardando: '+e.message); }
+}
+
+async function guardarCeldaEnSheets(arr, idx, field){
+  if(!gAccessToken) return;
+  const reg = arr[idx];
+  let sheetName, headerName;
+  if(arr===GAS){
+    sheetName  = SHEET_NAMES.gastos;
+    headerName = field==='monto'  ? 'Monto'
+               : field==='origen' ? 'Origen'
+               : field==='fecha'  ? 'Fecha de Pago'
+               : field==='est'    ? 'Estado'
+               : field;
+  } else if(arr===OBL){
+    sheetName  = SHEET_NAMES.obligaciones;
+    headerName = field==='monto' ? 'Monto'
+               : field==='origen' ? 'Origen'
+               : field==='fp'     ? 'Fecha de Pago'
+               : field==='fo'     ? 'Fecha Obligación'
+               : field==='est'    ? 'Estado'
+               : field;
+  } else {
+    sheetName  = SHEET_NAMES.ingresos;
+    headerName = field==='monto'   ? 'Monto'
+               : field==='entidad' ? 'Entidad'
+               : field==='banco'   ? 'Banco'
+               : field==='desc'    ? 'Descripción'
+               : field==='fecha'   ? 'Fecha'
+               : field;
+  }
+  try {
+    showSaveIndicator('💾 Guardando cambio...');
+    const {headers, rows} = await getSheetRows(sheetName);
+    const colIdx = colIndex(headers, headerName);
+    if(colIdx<0) throw new Error('Columna '+headerName+' no encontrada');
+
+    const mesLabel = ML[reg.mes]||reg.mes;
+    const fila = rows.find(r=>{
+      const vals = Object.values(r);
+      const desc = arr===ING ? (r['Descripción']||r['Descripcion']||'') : (vals[3]||'');
+      const mes  = r['MES']||r['Mes']||'';
+      return desc.toLowerCase()===reg.desc.toLowerCase() && mes.toLowerCase()===mesLabel.toLowerCase();
+    });
+    if(!fila){ showToast('⚠️ Fila no encontrada en Sheets'); return; }
+
+    const valor = field==='monto' ? `$${reg.monto.toLocaleString('es-CO')}` : reg[field];
+    await writeCell(sheetName, fila._rowNum, colLetter(colIdx), valor);
+    showSaveIndicator('✅ Guardado en Sheets');
+  } catch(e){ console.error(e); showToast('⚠️ Error guardando: '+e.message); }
+}
+
+async function guardarNuevoRegistroEnSheets(tipo, reg){
+  if(!gAccessToken) return;
+  let sheetName, fila;
+  const mesLabel = ML[reg.mes]||reg.mes;
+  const montoFmt = `$${reg.monto.toLocaleString('es-CO')}`;
+  if(tipo==='ingreso'){
+    sheetName = SHEET_NAMES.ingresos;
+    fila = [reg.id||'NEW', mesLabel, reg.fecha||'', reg.desc, reg.banco||'', reg.entidad||'', montoFmt];
+  } else if(tipo==='gasto'){
+    sheetName = SHEET_NAMES.gastos;
+    fila = [mesLabel, reg.fecha||'', reg.desc, reg.tipo||'', reg.origen||'', montoFmt, reg.est||'Pendiente'];
+  } else {
+    sheetName = SHEET_NAMES.obligaciones;
+    fila = [reg.id||'NEW', mesLabel, reg.fp||'', reg.desc, reg.tipo||'', reg.origen||'', montoFmt, reg.est||'Pendiente', reg.fo||''];
+  }
+  try {
+    showSaveIndicator('💾 Agregando fila...');
+    const base = `https://sheets.googleapis.com/v4/spreadsheets/${G_SHEET_ID}/values/${encodeURIComponent(sheetName+'!A:A')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    const res  = await fetch(base, {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+gAccessToken,'Content-Type':'application/json'},
+      body: JSON.stringify({values:[fila]}),
+    });
+    if(!res.ok) throw new Error(await res.text());
+    showSaveIndicator('✅ Fila agregada en Sheets');
+  } catch(e){ console.error(e); showToast('⚠️ Error agregando: '+e.message); }
+}
+
+window.onload=()=>{
+  initGoogleAuth();
+  // Aplicar rollover automático al cargar: registros Pendientes de meses pasados → mes siguiente
+  applyRollover(GAS);
+  applyRollover(OBL);
+  calcLibro();updateKPIs();buildCharts();buildResumen();buildEntidades();toggleForm();
+};
+</script>
+</body>
+</html>
